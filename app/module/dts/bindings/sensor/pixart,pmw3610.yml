@@ -1,7 +1,7 @@
 # Copyright (c) 2022 The ZMK Contributors
 # SPDX-License-Identifier: MIT
 description: |
-  Sensor driver for the pixart PMW3610 optical mouse sensor 
+  Sensor driver for the pixart PMW3610 optical mouse sensor
 
 compatible: "pixart,pmw3610"
 
@@ -11,6 +11,7 @@ properties:
   label:
     type: string
     required: true
+    deprecated: false
   irq-gpios:
     type: phandle-array
     required: true
