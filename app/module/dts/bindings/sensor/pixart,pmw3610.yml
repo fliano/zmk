@@ -10,8 +10,8 @@ include: spi-device.yaml
 properties:
   label:
     type: string
-    required: true
-    deprecated: false
+    required: false
+    deprecated: true
   irq-gpios:
     type: phandle-array
     required: true
