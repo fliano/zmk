@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <zephyr/kernel.h>
 #include <zmk/hid.h>
 #include <zmk/event_manager.h>
 #include <zmk/mouse.h>

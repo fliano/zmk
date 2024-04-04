@@ -32,6 +32,11 @@ static struct zmk_hid_mouse_report mouse_report = {.report_id = ZMK_HID_REPORT_I
 
 #endif // IS_ENABLED(CONFIG_ZMK_MOUSE)
 
+#if IS_ENABLED(CONFIG_ZMK_MOUSE)
+static struct zmk_hid_mouse_report mouse_report = {
+    .report_id = 4, .body = {.buttons = 0, .x = 0, .y = 0, .scroll_x = 0, .scroll_y = 0}};
+#endif
+
 // Keep track of how often a modifier was pressed.
 // Only release the modifier if the count is 0.
 static int explicit_modifier_counts[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -373,7 +378,7 @@ bool zmk_hid_is_pressed(uint32_t usage) {
 
 // Keep track of how often a button was pressed.
 // Only release the button if the count is 0.
-static int explicit_button_counts[5] = {0, 0, 0, 0, 0};
+static int explicit_button_counts[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 static zmk_mod_flags_t explicit_buttons = 0;
 
 #define SET_MOUSE_BUTTONS(btns)                                                                    \
@@ -430,22 +435,43 @@ int zmk_hid_mouse_buttons_release(zmk_mouse_button_flags_t buttons) {
     }
     return 0;
 }
+
+void zmk_hid_mouse_movement_set(int16_t x, int16_t y) {
+    mouse_report.body.x = x;
+    mouse_report.body.y = y;
+    LOG_DBG("Mouse movement set to 0x%02X 0x%02X ", mouse_report.body.x, mouse_report.body.y);
+}
+
+void zmk_hid_mouse_movement_update(int16_t x, int16_t y) {
+    mouse_report.body.x += x;
+    mouse_report.body.y += y;
+    LOG_DBG("Mouse movement updated to 0x%02X 0x%02X ", mouse_report.body.x, mouse_report.body.y);
+}
+
+void zmk_hid_mouse_scroll_set(int8_t x, int8_t y) {
+    mouse_report.body.scroll_x = x;
+    mouse_report.body.scroll_y = y;
+    LOG_DBG("Mouse scroll set to 0x%02X 0x%02X ", mouse_report.body.scroll_x,
+            mouse_report.body.scroll_y);
+}
+
+void zmk_hid_mouse_scroll_update(int8_t x, int8_t y) {
+    mouse_report.body.scroll_x += x;
+    mouse_report.body.scroll_y += y;
+    LOG_DBG("Mouse scroll updated to 0x%02X 0x%02X ", mouse_report.body.scroll_x,
+            mouse_report.body.scroll_y);
+}
 void zmk_hid_mouse_clear(void) { memset(&mouse_report.body, 0, sizeof(mouse_report.body)); }
 
 #endif // IS_ENABLED(CONFIG_ZMK_MOUSE)
 
-struct zmk_hid_keyboard_report *zmk_hid_get_keyboard_report(void) {
-    return &keyboard_report;
-}
+struct zmk_hid_keyboard_report *zmk_hid_get_keyboard_report(void) { return &keyboard_report; }
 
-struct zmk_hid_consumer_report *zmk_hid_get_consumer_report(void) {
-    return &consumer_report;
-}
+struct zmk_hid_consumer_report *zmk_hid_get_consumer_report(void) { return &consumer_report; }
 
 #if IS_ENABLED(CONFIG_ZMK_MOUSE)
 
-struct zmk_hid_mouse_report *zmk_hid_get_mouse_report(void) {
-    return &mouse_report;
-}
+struct zmk_hid_mouse_report *zmk_hid_get_mouse_report(void) { return &mouse_report; }
 
 #endif // IS_ENABLED(CONFIG_ZMK_MOUSE)
+       //
