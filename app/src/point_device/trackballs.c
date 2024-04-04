@@ -13,7 +13,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/endpoints.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/pd_raw_event.h>
-#include <zmk/events/endpoint_selection_changed.h>
+#include <zmk/events/endpoint_changed.h>
 
 #if ZMK_KEYMAP_HAS_TRACKBALLS
 
@@ -242,6 +242,6 @@ static int zmk_trackballs_init(const struct device *_arg) {
 SYS_INIT(zmk_trackballs_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
 
 ZMK_LISTENER(zmk_trackballs, zmk_trackballs_endpoint_listener)
-ZMK_SUBSCRIPTION(zmk_trackballs, zmk_endpoint_selection_changed)
+ZMK_SUBSCRIPTION(zmk_trackballs, zmk_endpoint_changed)
 
 #endif
