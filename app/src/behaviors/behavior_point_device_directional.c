@@ -194,11 +194,11 @@ static int on_pd_binding_triggered(struct zmk_behavior_binding *binding, int16_t
 
     // keycode determined, send press and release
     LOG_DBG("SEND keycode: %d", keycode);
-    ZMK_EVENT_RAISE(zmk_keycode_state_changed_from_encoded(keycode, true, timestamp));
+    raise_zmk_keycode_state_changed_from_encoded(keycode, true, timestamp);
 
     k_msleep(5);
 
-    ZMK_EVENT_RAISE(zmk_keycode_state_changed_from_encoded(keycode, false, timestamp));
+    raise_zmk_keycode_state_changed_from_encoded(keycode, false, timestamp);
 
     // reset state after sending
     data->previous_t = timestamp;
