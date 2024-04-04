@@ -106,7 +106,7 @@ static struct zmk_behavior_binding
 
 static struct zmk_behavior_binding
     zmk_trackball_keymap[ZMK_KEYMAP_LAYERS_LEN][ZMK_KEYMAP_TRACKBALLS_LEN] = {
-        DT_INST_FOREACH_CHILD(0, TRACKBALL_LAYER)};
+        DT_INST_FOREACH_CHILD_SEP(0, TRACKBALL_LAYER, (, ))};
 
 #endif /* ZMK_KEYMAP_HAS_TRACKBALLS */
 
