@@ -41,7 +41,7 @@ struct trackballs_data_item {
                 (_TRACKBALL_ITEM(ZMK_KEYMAP_TRACKBALLS_BY_IDX(idx))), ())
 
 static struct trackballs_data_item trackballs[] = {
-    UTIL_LISTIFY(ZMK_KEYMAP_TRACKBALLS_LEN, TRACKBALL_ITEM, 0)};
+    LISTIFY(ZMK_KEYMAP_TRACKBALLS_LEN, TRACKBALL_ITEM, (, ), 0)};
 
 // msg structure
 typedef struct {
@@ -235,7 +235,7 @@ static int zmk_trackballs_init(const struct device *_arg) {
     int local_index = 0;
     int absolute_index = 0;
 
-    UTIL_LISTIFY(ZMK_KEYMAP_TRACKBALLS_LEN, TRACKBALL_INIT, 0)
+    LISTIFY(ZMK_KEYMAP_TRACKBALLS_LEN, TRACKBALL_INIT, (, ), 0)
     return 0;
 }
 

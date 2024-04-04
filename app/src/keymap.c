@@ -56,6 +56,9 @@ static uint8_t _zmk_keymap_layer_default = 0;
         ({LISTIFY(DT_PROP_LEN(node, sensor_bindings), _TRANSFORM_SENSOR_ENTRY, (, ), node)}),      \
         ({}))
 
+/*static struct zmk_behavior_binding zmk_sensor_keymap[ZMK_KEYMAP_LAYERS_LEN]*/
+/*[ZMK_KEYMAP_SENSORS_LEN] = {*/
+/*DT_INST_FOREACH_CHILD(0, SENSOR_LAYER)};*/
 #endif /* ZMK_KEYMAP_HAS_SENSORS */
 
 #define LAYER_NAME(node) DT_PROP_OR(node, display_name, DT_PROP_OR(node, label, NULL))
@@ -80,6 +83,32 @@ static struct zmk_behavior_binding
         DT_INST_FOREACH_CHILD_SEP(0, SENSOR_LAYER, (, ))};
 
 #endif /* ZMK_KEYMAP_HAS_SENSORS */
+
+#if ZMK_KEYMAP_HAS_TRACKBALLS
+#define _TRANSFORM_TRACKBALL_ENTRY(idx, layer)                                                     \
+    {                                                                                              \
+        .behavior_dev = DT_LABEL(DT_PHANDLE_BY_IDX(layer, trackball_bindings, idx)),               \
+        .param1 = COND_CODE_0(DT_PHA_HAS_CELL_AT_IDX(layer, trackball_bindings, idx, param1), (0), \
+                              (DT_PHA_BY_IDX(layer, trackball_bindings, idx, param1))),            \
+        .param2 = COND_CODE_0(DT_PHA_HAS_CELL_AT_IDX(layer, trackball_bindings, idx, param2), (0), \
+                              (DT_PHA_BY_IDX(layer, trackball_bindings, idx, param2))),            \
+        .param3 = COND_CODE_0(DT_PHA_HAS_CELL_AT_IDX(layer, trackball_bindings, idx, param3), (0), \
+                              (DT_PHA_BY_IDX(layer, trackball_bindings, idx, param3))),            \
+        .param4 = COND_CODE_0(DT_PHA_HAS_CELL_AT_IDX(layer, trackball_bindings, idx, param4), (0), \
+                              (DT_PHA_BY_IDX(layer, trackball_bindings, idx, param4))),            \
+    },
+
+#define TRACKBALL_LAYER(node)                                                                      \
+    COND_CODE_1(DT_NODE_HAS_PROP(node, trackball_bindings),                                        \
+                ({LISTIFY(DT_PROP_LEN(node, trackball_bindings), _TRANSFORM_TRACKBALL_ENTRY, (, ), \
+                          node)}),                                                                 \
+                ({})),
+
+static struct zmk_behavior_binding
+    zmk_trackball_keymap[ZMK_KEYMAP_LAYERS_LEN][ZMK_KEYMAP_TRACKBALLS_LEN] = {
+        DT_INST_FOREACH_CHILD(0, TRACKBALL_LAYER)};
+
+#endif /* ZMK_KEYMAP_HAS_TRACKBALLS */
 
 static inline int set_layer_state(uint8_t layer, bool state) {
     int ret = 0;
@@ -311,27 +340,71 @@ int zmk_keymap_sensor_event(uint8_t sensor_index,
 
 #endif /* ZMK_KEYMAP_HAS_SENSORS */
 
-int keymap_listener(const zmk_event_t *eh) {
-    const struct zmk_position_state_changed *pos_ev;
-    if ((pos_ev = as_zmk_position_state_changed(eh)) != NULL) {
-        return zmk_keymap_position_state_changed(pos_ev->source, pos_ev->position, pos_ev->state,
-                                                 pos_ev->timestamp);
+#if ZMK_KEYMAP_HAS_TRACKBALLS inline static int zmk_keymap_trackball_triggered(
+    uint8_t id, int16_t dx, int16_t dy, int dt, int64_t timestamp) {
+        for (int layer = ZMK_KEYMAP_LAYERS_LEN - 1; layer >= _zmk_keymap_layer_default; layer--) {
+            if (zmk_keymap_layer_active(layer) && zmk_trackball_keymap[layer] != NULL) {
+                struct zmk_behavior_binding *binding = &zmk_trackball_keymap[layer][id];
+                const struct device *behavior;
+                int ret;
+
+                LOG_INF("layer: %d slider_id: %d, binding name: %s", layer, id,
+                        log_strdup(binding->behavior_dev));
+
+                behavior = device_get_binding(binding->behavior_dev);
+
+                if (!behavior) {
+                    LOG_DBG("No behavior assigned to %d on layer %d", id, layer);
+                    continue;
+                }
+
+                ret = behavior_pd_keymap_binding_triggered(binding, dx, dy, dt, timestamp);
+
+                if (ret > 0) {
+                    LOG_DBG("behavior processing to continue to next layer");
+                    continue;
+                } else if (ret < 0) {
+                    LOG_DBG("Behavior returned error: %d", ret);
+                    return ret;
+                } else {
+                    return ret;
+                }
+            }
+        }
+
+        return -ENOTSUP;
     }
+#endif /* ZMK_KEYMAP_HAS_TRACKBALLS */
+
+    int keymap_listener(const zmk_event_t *eh) {
+        const struct zmk_position_state_changed *pos_ev;
+        if ((pos_ev = as_zmk_position_state_changed(eh)) != NULL) {
+            return zmk_keymap_position_state_changed(pos_ev->source, pos_ev->position,
+                                                     pos_ev->state, pos_ev->timestamp);
+        }
 
 #if ZMK_KEYMAP_HAS_SENSORS
-    const struct zmk_sensor_event *sensor_ev;
-    if ((sensor_ev = as_zmk_sensor_event(eh)) != NULL) {
-        return zmk_keymap_sensor_event(sensor_ev->sensor_index, sensor_ev->channel_data,
-                                       sensor_ev->channel_data_size, sensor_ev->timestamp);
-    }
+        const struct zmk_sensor_event *sensor_ev;
+        if ((sensor_ev = as_zmk_sensor_event(eh)) != NULL) {
+            return zmk_keymap_sensor_event(sensor_ev->sensor_index, sensor_ev->channel_data,
+                                           sensor_ev->channel_data_size, sensor_ev->timestamp);
+        }
 #endif /* ZMK_KEYMAP_HAS_SENSORS */
 
-    return -ENOTSUP;
-}
+        const struct zmk_pd_raw_event *pd_ev;
+        if ((pd_ev = as_zmk_pd_raw_event(eh)) != NULL) {
+            switch (pd_ev->type) {
+#if ZMK_KEYMAP_HAS_TRACKBALLS
+            case TRACKBALL:
+                return zmk_keymap_trackball_triggered(pd_ev->id, pd_ev->dx, pd_ev->dy, pd_ev->dt,
+                                                      pd_ev->update_time);
+#endif /* ZMK_KEYMAP_HAS_TRACKBALLS */
+                return -ENOTSUP;
+            }
 
-ZMK_LISTENER(keymap, keymap_listener);
-ZMK_SUBSCRIPTION(keymap, zmk_position_state_changed);
+            ZMK_LISTENER(keymap, keymap_listener);
+            ZMK_SUBSCRIPTION(keymap, zmk_position_state_changed);
 
 #if ZMK_KEYMAP_HAS_SENSORS
-ZMK_SUBSCRIPTION(keymap, zmk_sensor_event);
+            ZMK_SUBSCRIPTION(keymap, zmk_sensor_event);
 #endif /* ZMK_KEYMAP_HAS_SENSORS */
