@@ -87,7 +87,7 @@ static struct zmk_behavior_binding
 #if ZMK_KEYMAP_HAS_TRACKBALLS
 #define _TRANSFORM_TRACKBALL_ENTRY(idx, layer)                                                     \
     {                                                                                              \
-        .behavior_dev = DT_LABEL(DT_PHANDLE_BY_IDX(layer, trackball_bindings, idx)),               \
+        .behavior_dev = DEVICE_DT_NAME(DT_PHANDLE_BY_IDX(layer, trackball_bindings, idx)),         \
         .param1 = COND_CODE_0(DT_PHA_HAS_CELL_AT_IDX(layer, trackball_bindings, idx, param1), (0), \
                               (DT_PHA_BY_IDX(layer, trackball_bindings, idx, param1))),            \
         .param2 = COND_CODE_0(DT_PHA_HAS_CELL_AT_IDX(layer, trackball_bindings, idx, param2), (0), \
