@@ -349,8 +349,7 @@ inline static int zmk_keymap_trackball_triggered(uint8_t id, int16_t dx, int16_t
         const struct device *behavior;
         int ret;
 
-        LOG_INF("layer: %d slider_id: %d, binding name: %s", layer, id,
-                log_strdup(binding->behavior_dev));
+        LOG_INF("layer: %d trackball_id: %d, binding name: %s", layer, id, binding->behavior_dev);
 
         behavior = device_get_binding(binding->behavior_dev);
 
