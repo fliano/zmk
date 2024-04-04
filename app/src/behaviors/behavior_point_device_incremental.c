@@ -78,11 +78,11 @@ static int on_pd_binding_triggered(struct zmk_behavior_binding *binding, int16_t
     // choose the report type
     switch (cfg->mode) {
     case MOVE_MODE:
-        return ZMK_EVENT_RAISE(new_zmk_pd_position_state_changed(
+        return ZMK_EVENT_RAISE(as_zmk_pd_position_state_changed(
             (struct zmk_pd_position_state_changed){.x = x, .y = y}));
     case SCROLL_MODE:
         return ZMK_EVENT_RAISE(
-            new_zmk_pd_scroll_state_changed((struct zmk_pd_scroll_state_changed){.x = x, .y = y}));
+            as_zmk_pd_scroll_state_changed((struct zmk_pd_scroll_state_changed){.x = x, .y = y}));
     default:
         LOG_ERR("unsupported work mode %d", cfg->mode);
         return -ENOTSUP;
