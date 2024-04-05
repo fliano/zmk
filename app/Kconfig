@@ -377,6 +377,12 @@ rsource "src/mouse/Kconfig"
 #Mouse Options
 endmenu
 
+menu "Point Device Options"
+
+rsource "src/point_device/Kconfig"
+
+endmenu
+
 menu "Power Management"
 
 config ZMK_BATTERY_REPORTING

@@ -30,6 +30,9 @@ enum behavior_sensor_binding_process_mode {
 
 typedef int (*behavior_keymap_binding_callback_t)(struct zmk_behavior_binding *binding,
                                                   struct zmk_behavior_binding_event event);
+typedef int (*behavior_pd_keymap_binding_callback_t)(struct zmk_behavior_binding *binding,
+                                                     int16_t dx, int16_t dy, int dt,
+                                                     int64_t timestamp);
 typedef int (*behavior_sensor_keymap_binding_process_callback_t)(
     struct zmk_behavior_binding *binding, struct zmk_behavior_binding_event event,
     enum behavior_sensor_binding_process_mode mode);
@@ -51,6 +54,7 @@ __subsystem struct behavior_driver_api {
     behavior_keymap_binding_callback_t binding_released;
     behavior_sensor_keymap_binding_accept_data_callback_t sensor_binding_accept_data;
     behavior_sensor_keymap_binding_process_callback_t sensor_binding_process;
+    behavior_pd_keymap_binding_callback_t pd_binding_triggered;
 };
 /**
  * @endcond
@@ -267,6 +271,37 @@ z_impl_behavior_sensor_keymap_binding_process(struct zmk_behavior_binding *bindi
     }
 
     return api->sensor_binding_process(binding, event, mode);
+}
+
+/**
+ * @brief Handle the a point device keymap binding being triggered
+ * @param binding Pointer to the data structure for the behavior binding.
+ * @param sensor Pointer to the sensor device structure for the sensor driver instance.
+ * @param param1 User parameter specified at time of behavior binding.
+ * @param param2 User parameter specified at time of behavior binding.
+ *
+ * @retval 0 If successful.
+ * @retval Negative errno code if failure.
+ */
+__syscall int behavior_pd_keymap_binding_triggered(struct zmk_behavior_binding *binding, int16_t dx,
+                                                   int16_t dy, int dt, int64_t timestamp);
+
+static inline int z_impl_behavior_pd_keymap_binding_triggered(struct zmk_behavior_binding *binding,
+                                                              int16_t dx, int16_t dy, int dt,
+                                                              int64_t timestamp) {
+    const struct device *dev = device_get_binding(binding->behavior_dev);
+
+    if (dev == NULL) {
+        return -EINVAL;
+    }
+
+    const struct behavior_driver_api *api = (const struct behavior_driver_api *)dev->api;
+
+    if (api->pd_binding_triggered == NULL) {
+        return -ENOTSUP;
+    }
+
+    return api->pd_binding_triggered(binding, dx, dy, dt, timestamp);
 }
 
 /**
