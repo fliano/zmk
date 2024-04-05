@@ -160,10 +160,11 @@ void zmk_trackballs_timer_stop(struct k_timer *timer) {
 int zmk_trackballs_endpoint_listener(const zmk_event_t *eh) {
     LOG_INF("Update polling parameters based on current endpoint");
 
+    struct zmk_endpoint_instance ep_inst = zmk_endpoints_selected();
     // update polling parameters
-    switch (zmk_endpoints_selected()) {
+    switch (ep_inst.transport) {
 #if IS_ENABLED(CONFIG_ZMK_USB)
-    case ZMK_ENDPOINT_USB: {
+    case ZMK_TRANSPORT_USB: {
         max_poll_count =
             CONFIG_ZMK_TRACKBALL_POLL_DURATION / CONFIG_ZMK_TRACKBALL_USB_POLL_INTERVAL;
         polling_interval = CONFIG_ZMK_TRACKBALL_USB_POLL_INTERVAL;
@@ -172,7 +173,7 @@ int zmk_trackballs_endpoint_listener(const zmk_event_t *eh) {
 #endif /* IS_ENABLED(CONFIG_ZMK_USB) */
 
 #if IS_ENABLED(CONFIG_ZMK_BLE)
-    case ZMK_ENDPOINT_BLE: {
+    case ZMK_TRANSPORT_BLE: {
         max_poll_count =
             CONFIG_ZMK_TRACKBALL_POLL_DURATION / CONFIG_ZMK_TRACKBALL_BLE_POLL_INTERVAL;
         polling_interval = CONFIG_ZMK_TRACKBALL_BLE_POLL_INTERVAL;
