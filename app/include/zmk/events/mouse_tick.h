@@ -23,12 +23,10 @@ struct zmk_mouse_tick {
 
 ZMK_EVENT_DECLARE(zmk_mouse_tick);
 
-static inline struct zmk_mouse_tick_event *zmk_mouse_tick(struct vector2d max_move,
-                                                          struct vector2d max_scroll,
-                                                          struct mouse_config move_config,
-                                                          struct mouse_config scroll_config,
-                                                          int64_t *movement_start) {
-    return as_zmk_mouse_tick((struct zmk_mouse_tick){
+static inline int raise_mouse_tick(struct vector2d max_move, struct vector2d max_scroll,
+                                   struct mouse_config move_config,
+                                   struct mouse_config scroll_config, int64_t *movement_start) {
+    return raise_zmk_mouse_tick((struct zmk_mouse_tick){
         .max_move = max_move,
         .max_scroll = max_scroll,
         .move_config = move_config,

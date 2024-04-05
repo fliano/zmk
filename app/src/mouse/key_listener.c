@@ -50,8 +50,7 @@ static void mouse_tick_timer_handler(struct k_work *work) {
     zmk_hid_mouse_movement_set(0, 0);
     zmk_hid_mouse_scroll_set(0, 0);
     LOG_DBG("Raising mouse tick event");
-    ZMK_EVENT_RAISE(
-        zmk_mouse_tick(move_speed, scroll_speed, move_config, scroll_config, &start_time));
+    raise_mouse_tick(move_speed, scroll_speed, move_config, scroll_config, &start_time);
     zmk_endpoints_send_mouse_report();
 }
 

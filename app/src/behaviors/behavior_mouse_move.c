@@ -26,8 +26,8 @@ static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
     LOG_DBG("position %d keycode 0x%02X", event.position, binding->param1);
     const struct device *dev = device_get_binding(binding->behavior_dev);
     const struct mouse_config *config = dev->config;
-    return ZMK_EVENT_RAISE(
-        zmk_mouse_move_state_changed_from_encoded(binding->param1, *config, true, event.timestamp));
+    return raise_zmk_mouse_move_state_changed_from_encoded(binding->param1, *config, true,
+                                                           event.timestamp);
 }
 
 static int on_keymap_binding_released(struct zmk_behavior_binding *binding,
@@ -35,8 +35,8 @@ static int on_keymap_binding_released(struct zmk_behavior_binding *binding,
     LOG_DBG("position %d keycode 0x%02X", event.position, binding->param1);
     const struct device *dev = device_get_binding(binding->behavior_dev);
     const struct mouse_config *config = dev->config;
-    return ZMK_EVENT_RAISE(zmk_mouse_move_state_changed_from_encoded(binding->param1, *config,
-                                                                     false, event.timestamp));
+    return raise_zmk_mouse_move_state_changed_from_encoded(binding->param1, *config, false,
+                                                           event.timestamp);
 }
 
 static const struct behavior_driver_api behavior_mouse_move_driver_api = {
@@ -48,7 +48,7 @@ static const struct behavior_driver_api behavior_mouse_move_driver_api = {
         .time_to_max_speed_ms = DT_INST_PROP(n, time_to_max_speed_ms),                             \
         .acceleration_exponent = DT_INST_PROP(n, acceleration_exponent),                           \
     };                                                                                             \
-    DEVICE_DT_INST_DEFINE(n, behavior_mouse_move_init, NULL, NULL,                \
+    DEVICE_DT_INST_DEFINE(n, behavior_mouse_move_init, NULL, NULL,                                 \
                           &behavior_mouse_move_config_##n, APPLICATION,                            \
                           CONFIG_KERNEL_INIT_PRIORITY_DEFAULT, &behavior_mouse_move_driver_api);
 
