@@ -48,7 +48,7 @@ target_sources_ifdef(CONFIG_ZMK_EXT_POWER app PRIVATE src/behaviors/behavior_ext
 target_sources_ifdef(CONFIG_ZMK_BEHAVIOR_SOFT_OFF app PRIVATE src/behaviors/behavior_soft_off.c)
 if ((NOT CONFIG_ZMK_SPLIT) OR CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
   target_sources(app PRIVATE src/hid.c)
-  target_sources_ifdef(CONFIG_ZMK_MOUSE app PRIVATE src/mouse.c)
+  #target_sources_ifdef(CONFIG_ZMK_MOUSE app PRIVATE src/mouse.c)
   target_sources(app PRIVATE src/behaviors/behavior_key_press.c)
   target_sources_ifdef(CONFIG_ZMK_BEHAVIOR_KEY_TOGGLE app PRIVATE src/behaviors/behavior_key_toggle.c)
   target_sources(app PRIVATE src/behaviors/behavior_hold_tap.c)
