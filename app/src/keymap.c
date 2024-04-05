@@ -401,16 +401,20 @@ int keymap_listener(const zmk_event_t *eh) {
             return zmk_keymap_trackball_triggered(pd_ev->id, pd_ev->dx, pd_ev->dy, pd_ev->dt,
                                                   pd_ev->update_time);
 #endif /* ZMK_KEYMAP_HAS_TRACKBALLS */
-            return -ENOTSUP;
+        default:
+            break;
         }
+    }
+    return -ENOTSUP;
+}
 
-        ZMK_LISTENER(keymap, keymap_listener);
-        ZMK_SUBSCRIPTION(keymap, zmk_position_state_changed);
+ZMK_LISTENER(keymap, keymap_listener);
+ZMK_SUBSCRIPTION(keymap, zmk_position_state_changed);
 
 #if ZMK_KEYMAP_HAS_SENSORS
-        ZMK_SUBSCRIPTION(keymap, zmk_sensor_event);
+ZMK_SUBSCRIPTION(keymap, zmk_sensor_event);
 #endif /* ZMK_KEYMAP_HAS_SENSORS */
 
 #if ZMK_KEYMAP_HAS_TRACKBALLS
-        ZMK_SUBSCRIPTION(keymap, zmk_pd_raw_event);
+ZMK_SUBSCRIPTION(keymap, zmk_pd_raw_event);
 #endif
