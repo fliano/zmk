@@ -315,14 +315,14 @@ struct zmk_hid_consumer_report {
     struct zmk_hid_consumer_report_body body;
 } __packed;
 
-#if IS_ENABLED(CONFIG_ZMK_MOUSE) struct zmk_hid_mouse_report_body {
-zmk_mouse_button_flags_t buttons;
-int8_t d_x;
-int8_t d_y;
-int8_t scroll_y;
-int8_t scroll_x;
-}
-__packed;
+#if IS_ENABLED(CONFIG_ZMK_MOUSE)
+struct zmk_hid_mouse_report_body {
+    zmk_mouse_button_flags_t buttons;
+    int8_t d_x;
+    int8_t d_y;
+    int8_t scroll_y;
+    int8_t scroll_x;
+} __packed;
 
 struct zmk_hid_mouse_report {
     uint8_t report_id;
@@ -379,6 +379,7 @@ zmk_hid_boot_report_t *zmk_hid_get_boot_report();
 #if IS_ENABLED(CONFIG_ZMK_MOUSE)
 struct zmk_hid_mouse_report *zmk_hid_get_mouse_report();
 #endif // IS_ENABLED(CONFIG_ZMK_MOUSE)
+       //
        //
        //
        //
