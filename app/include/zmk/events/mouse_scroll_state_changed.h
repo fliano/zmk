@@ -29,6 +29,6 @@ zmk_mouse_scroll_state_changed_from_encoded(uint32_t encoded, struct mouse_confi
         .y = SCROLL_VERT_DECODE(encoded),
     };
 
-    return new_zmk_mouse_scroll_state_changed((struct zmk_mouse_scroll_state_changed){
+    return as_zmk_mouse_scroll_state_changed((struct zmk_mouse_scroll_state_changed){
         .max_speed = max_speed, .config = config, .state = pressed, .timestamp = timestamp});
 }

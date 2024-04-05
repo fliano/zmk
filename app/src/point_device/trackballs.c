@@ -60,13 +60,12 @@ void zmk_trackballs_process_msgq(struct k_work *work) {
     while (k_msgq_get(&zmk_trackballs_msgq, &msg, K_NO_WAIT) == 0) {
         LOG_INF("Process event from trackball_%d: dx: %d, dy: %d, dt: %d ms", msg.id, msg.dx,
                 msg.dy, msg.dt);
-        ZMK_EVENT_RAISE(
-            new_zmk_pd_raw_event((struct zmk_pd_raw_event){.type = TRACKBALL,
-                                                           .id = msg.id,
-                                                           .dx = msg.dx,
-                                                           .dy = msg.dy,
-                                                           .dt = msg.dt,
-                                                           .update_time = k_uptime_get()}));
+        raise_zmk_pd_raw_event((struct zmk_pd_raw_event){.type = TRACKBALL,
+                                                         .id = msg.id,
+                                                         .dx = msg.dx,
+                                                         .dy = msg.dy,
+                                                         .dt = msg.dt,
+                                                         .update_time = k_uptime_get()});
     }
 }
 
