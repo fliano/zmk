@@ -643,7 +643,8 @@ static int pmw3610_async_init_configure(const struct device *dev) {
 
 // checked and keep
 static void pmw3610_async_init(struct k_work *work) {
-    struct pixart_data *data = CONTAINER_OF(work, struct pixart_data, init_work);
+    struct k_work_delayable *d_work = k_work_delayable_from_work(work);
+    struct pixart_data *data = CONTAINER_OF(d_work, struct pixart_data, init_work);
     const struct device *dev = data->dev;
 
     LOG_INF("PMW3610 async init step %d", data->async_init_step);
