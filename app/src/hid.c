@@ -28,7 +28,7 @@ static uint8_t keys_held = 0;
 #if IS_ENABLED(CONFIG_ZMK_MOUSE)
 static struct zmk_hid_mouse_report mouse_report = {
     .report_id = ZMK_HID_REPORT_ID_MOUSE,
-    .body = {.buttons = 0, .x = 0, .y = 0, .scroll_x = 0, .scroll_y = 0}};
+    .body = {.buttons = 0, .d_x = 0, .d_y = 0, .scroll_x = 0, .scroll_y = 0}};
 #endif // IS_ENABLED(CONFIG_ZMK_MOUSE)
 
 // Keep track of how often a modifier was pressed.
@@ -431,15 +431,16 @@ int zmk_hid_mouse_buttons_release(zmk_mouse_button_flags_t buttons) {
 }
 
 void zmk_hid_mouse_movement_set(int16_t x, int16_t y) {
-    mouse_report.body.x = x;
-    mouse_report.body.y = y;
-    LOG_DBG("Mouse movement set to 0x%02X 0x%02X ", mouse_report.body.x, mouse_report.body.y);
+    mouse_report.body.d_x = x;
+    mouse_report.body.d_y = y;
+    LOG_DBG("Mouse movement set to 0x%02X 0x%02X ", mouse_report.body.d_x, mouse_report.body.d_y);
 }
 
 void zmk_hid_mouse_movement_update(int16_t x, int16_t y) {
-    mouse_report.body.x += x;
-    mouse_report.body.y += y;
-    LOG_DBG("Mouse movement updated to 0x%02X 0x%02X ", mouse_report.body.x, mouse_report.body.y);
+    mouse_report.body.d_x += x;
+    mouse_report.body.d_y += y;
+    LOG_DBG("Mouse movement updated to 0x%02X 0x%02X ", mouse_report.body.d_x,
+            mouse_report.body.d_y);
 }
 
 void zmk_hid_mouse_scroll_set(int8_t x, int8_t y) {
@@ -468,4 +469,5 @@ struct zmk_hid_consumer_report *zmk_hid_get_consumer_report(void) { return &cons
 struct zmk_hid_mouse_report *zmk_hid_get_mouse_report(void) { return &mouse_report; }
 
 #endif // IS_ENABLED(CONFIG_ZMK_MOUSE)
+       //
        //
