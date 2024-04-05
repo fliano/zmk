@@ -17,6 +17,9 @@ child-binding:
     sensor-bindings:
       type: phandle-array
       required: false
+    trackball-bindings:
+      type: phandle-array
+      required: false
 
     label:
       type: string
