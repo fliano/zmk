@@ -504,16 +504,6 @@ static int rgb_underglow_event_listener(const zmk_event_t *eh) {
     return -ENOTSUP;
 }
 
-static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
-    struct zmk_battery_state_changed sc = as_zmk_battery_state_changed(eh);
-    if (sc && sc.state_of_charge < 95) {
-        struct zmk_led_hsb color = {h : 0, s : 100, b : 100};
-        return zmk_rgb_underglow_set_hsb(color);
-    }
-
-    return -ENOTSUP;
-}
-
 ZMK_LISTENER(rgb_underglow, rgb_underglow_event_listener);
 #endif // IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_IDLE) ||
        // IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
@@ -525,6 +515,16 @@ ZMK_SUBSCRIPTION(rgb_underglow, zmk_activity_state_changed);
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
 ZMK_SUBSCRIPTION(rgb_underglow, zmk_usb_conn_state_changed);
 #endif
+
+static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
+    struct zmk_battery_state_changed sc = as_zmk_battery_state_changed(eh);
+    if (sc && sc.state_of_charge < 95) {
+        struct zmk_led_hsb color = {h : 0, s : 100, b : 100};
+        return zmk_rgb_underglow_set_hsb(color);
+    }
+
+    return -ENOTSUP;
+}
 
 ZMK_LISTENER(rgb_battery, rgb_underglow_battery_state_event_listener);
 ZMK_SUBSCRIPTION(rgb_battery, zmk_battery_state_changed);
