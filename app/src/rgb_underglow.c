@@ -528,7 +528,7 @@ static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
         return zmk_rgb_underglow_set_hsb(color);
     }
     if (sc && sc->state_of_charge < 95) {
-        struct zmk_led_hsb color = {h : 0, s : 100, b : 100};
+        struct zmk_led_hsb color = {h : 200, s : 100, b : 50};
         return zmk_rgb_underglow_set_hsb(color);
     }
     if (sc && sc->state_of_charge > 95) {
