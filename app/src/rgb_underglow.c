@@ -518,6 +518,7 @@ ZMK_SUBSCRIPTION(rgb_underglow, zmk_usb_conn_state_changed);
 
 static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
     const struct zmk_battery_state_changed *sc = as_zmk_battery_state_changed(eh);
+    LOG_DBG("event listener triggered %d", sc->state_of_charge);
     if (sc && sc->state_of_charge < 50) {
         struct zmk_led_hsb color = {h : 0, s : 100, b : 50};
         return zmk_rgb_underglow_set_hsb(color);
