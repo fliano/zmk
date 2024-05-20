@@ -91,7 +91,6 @@ static int zmk_battery_update(const struct device *battery) {
 #error "Not a supported reporting fetch mode"
 #endif
 
-    LOG_DBG("update battery value %d", last_state_of_charge);
     if (last_state_of_charge != state_of_charge.val1) {
         last_state_of_charge = state_of_charge.val1;
 #if IS_ENABLED(CONFIG_BT_BAS)
@@ -128,7 +127,6 @@ static void zmk_battery_timer(struct k_timer *timer) {
 K_TIMER_DEFINE(battery_timer, zmk_battery_timer, NULL);
 
 static void zmk_battery_start_reporting() {
-    LOG_DBG("start battery reporting");
     if (device_is_ready(battery)) {
         k_timer_start(&battery_timer, K_NO_WAIT, K_SECONDS(CONFIG_ZMK_BATTERY_REPORT_INTERVAL));
     }
