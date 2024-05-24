@@ -519,6 +519,16 @@ ZMK_SUBSCRIPTION(rgb_underglow, zmk_usb_conn_state_changed);
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS)
 static void rgb_underglow_status_timeout_work(struct k_work *work) {
     struct zmk_led_hsb color = {h : 240, s : 100, b : 100};
+
+#if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
+    if (zmk_usb_is_powered()) {
+        zmk_rgb_underglow_set_hsb(color);
+    } else {
+        zmk_rgb_underglow_off();
+    }
+    return;
+#endif
+
     zmk_rgb_underglow_set_hsb(color);
 }
 
