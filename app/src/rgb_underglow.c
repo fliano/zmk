@@ -516,6 +516,7 @@ ZMK_SUBSCRIPTION(rgb_underglow, zmk_activity_state_changed);
 ZMK_SUBSCRIPTION(rgb_underglow, zmk_usb_conn_state_changed);
 #endif
 
+#if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS)
 static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
     const struct zmk_battery_state_changed *sc = as_zmk_battery_state_changed(eh);
     if (sc && sc->state_of_charge < 20) {
@@ -527,5 +528,6 @@ static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
 
 ZMK_LISTENER(rgb_battery, rgb_underglow_battery_state_event_listener);
 ZMK_SUBSCRIPTION(rgb_battery, zmk_battery_state_changed);
+#endif
 
 SYS_INIT(zmk_rgb_underglow_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
