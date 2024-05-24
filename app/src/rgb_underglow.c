@@ -519,10 +519,22 @@ ZMK_SUBSCRIPTION(rgb_underglow, zmk_usb_conn_state_changed);
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS)
 static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
     const struct zmk_battery_state_changed *sc = as_zmk_battery_state_changed(eh);
-    if (sc && sc->state_of_charge < 20) {
-        struct zmk_led_hsb color = {h : 0, s : 100, b : 100};
+    if (!sc) {
+        LOG_ERR("underglow battery state listener called with unsupported argument");
+        return -ENOTSUP;
+    }
+
+    if (sc && sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_CRITICALLY_LOW_THRESHOLD) {
+        struct zmk_led_hsb color = {h : 0, s : 100, b : 30};
+        return zmk_rgb_underglow_set_hsb(color);
+    } else if (sc && sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_LOW_THRESHOLD) {
+        struct zmk_led_hsb color = {h : 60, s : 100, b : 30};
+        return zmk_rgb_underglow_set_hsb(color);
+    } else if (sc) {
+        struct zmk_led_hsb color = {h : 120, s : 100, b : 30};
         return zmk_rgb_underglow_set_hsb(color);
     }
+
     return -ENOTSUP;
 }
 
