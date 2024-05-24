@@ -517,6 +517,19 @@ ZMK_SUBSCRIPTION(rgb_underglow, zmk_usb_conn_state_changed);
 #endif
 
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS)
+static void rgb_underglow_status_timeout_work(struct k_work *work) {
+    struct zmk_led_hsb color = {h : 240, s : 100, b : 100};
+    zmk_rgb_underglow_set_hsb(color);
+}
+
+K_WORK_DEFINE(underglow_timeout_work, rgb_underglow_status_timeout_work);
+
+static void rgb_underglow_status_timeout_timer(struct k_timer *timer) {
+    k_work_submit_to_queue(zmk_workqueue_lowprio_work_q(), &underglow_timeout_work);
+}
+
+K_TIMER_DEFINE(underglow_timeout_timer, rgb_underglow_status_timeout_timer);
+
 static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
     const struct zmk_battery_state_changed *sc = as_zmk_battery_state_changed(eh);
     if (!sc) {
@@ -534,6 +547,8 @@ static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
         struct zmk_led_hsb color = {h : 120, s : 100, b : 30};
         return zmk_rgb_underglow_set_hsb(color);
     }
+
+    k_timer_start(&underglow_timeout_timer, K_SECONDS(1), K_NO_WAIT);
 
     return -ENOTSUP;
 }
