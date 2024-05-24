@@ -528,7 +528,7 @@ static void rgb_underglow_status_timeout_timer(struct k_timer *timer) {
     k_work_submit_to_queue(zmk_workqueue_lowprio_work_q(), &underglow_timeout_work);
 }
 
-K_TIMER_DEFINE(underglow_timeout_timer, rgb_underglow_status_timeout_timer);
+K_TIMER_DEFINE(underglow_timeout_timer, rgb_underglow_status_timeout_timer, NULL);
 
 static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
     const struct zmk_battery_state_changed *sc = as_zmk_battery_state_changed(eh);
