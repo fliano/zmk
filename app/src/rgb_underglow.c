@@ -524,13 +524,13 @@ static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
         return -ENOTSUP;
     }
 
-    if (sc && sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_CRITICALLY_LOW_THRESHOLD) {
+    if (sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_CRITICALLY_LOW_THRESHOLD) {
         struct zmk_led_hsb color = {h : 0, s : 100, b : 30};
         return zmk_rgb_underglow_set_hsb(color);
-    } else if (sc && sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_LOW_THRESHOLD) {
+    } else if (sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_LOW_THRESHOLD) {
         struct zmk_led_hsb color = {h : 60, s : 100, b : 30};
         return zmk_rgb_underglow_set_hsb(color);
-    } else if (sc) {
+    } else {
         struct zmk_led_hsb color = {h : 120, s : 100, b : 30};
         return zmk_rgb_underglow_set_hsb(color);
     }
