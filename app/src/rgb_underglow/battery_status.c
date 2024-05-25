@@ -8,6 +8,7 @@
 
 #include <zephyr/logging/log.h>
 
+#include <zmk/rgb_underglow/current_status.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 #include <zmk/usb.h>
 #include <zmk/event_manager.h>
@@ -17,18 +18,7 @@
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 static void rgb_underglow_status_timeout_work(struct k_work *work) {
-    struct zmk_led_hsb color = {h : 240, s : 100, b : 100};
-
-#if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
-    if (zmk_usb_is_powered()) {
-        zmk_rgb_ug_set_hsb(color);
-    } else {
-        zmk_rgb_ug_off();
-    }
-    return;
-#endif
-
-    zmk_rgb_ug_set_hsb(color);
+    zmk_rgb_underglow_apply_current_state();
 }
 
 K_WORK_DEFINE(underglow_timeout_work, rgb_underglow_status_timeout_work);
