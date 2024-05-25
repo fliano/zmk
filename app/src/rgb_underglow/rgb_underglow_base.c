@@ -296,7 +296,7 @@ int zmk_rgb_underglow_save_state(void) {
 #endif
 }
 
-int zmk_rgb_underglow_get_state(bool *on_off) {
+int zmk_rgb_ug_get_state(bool *on_off) {
     if (!led_strip)
         return -ENODEV;
 
@@ -304,7 +304,7 @@ int zmk_rgb_underglow_get_state(bool *on_off) {
     return 0;
 }
 
-int zmk_rgb_underglow_on(void) {
+int zmk_rgb_ug_on(void) {
     if (!led_strip)
         return -ENODEV;
 
@@ -334,7 +334,7 @@ static void zmk_rgb_underglow_off_handler(struct k_work *work) {
 
 K_WORK_DEFINE(underglow_off_work, zmk_rgb_underglow_off_handler);
 
-int zmk_rgb_underglow_off(void) {
+int zmk_rgb_ug_off(void) {
     if (!led_strip)
         return -ENODEV;
 
@@ -355,11 +355,7 @@ int zmk_rgb_underglow_off(void) {
     return zmk_rgb_underglow_save_state();
 }
 
-int zmk_rgb_underglow_calc_effect(int direction) {
-    return (state.current_effect + UNDERGLOW_EFFECT_NUMBER + direction) % UNDERGLOW_EFFECT_NUMBER;
-}
-
-int zmk_rgb_underglow_select_effect(int effect) {
+int zmk_rgb_ug_select_effect(int effect) {
     if (!led_strip)
         return -ENODEV;
 
@@ -373,114 +369,26 @@ int zmk_rgb_underglow_select_effect(int effect) {
     return zmk_rgb_underglow_save_state();
 }
 
-int zmk_rgb_underglow_cycle_effect(int direction) {
-    return zmk_rgb_underglow_select_effect(zmk_rgb_underglow_calc_effect(direction));
-}
-
-int zmk_rgb_underglow_toggle(void) {
-    return state.on ? zmk_rgb_underglow_off() : zmk_rgb_underglow_on();
-}
-
-int zmk_rgb_underglow_set_hsb(struct zmk_led_hsb color) {
+int zmk_rgb_ug_set_hsb(struct zmk_led_hsb color) {
     if (color.h > HUE_MAX || color.s > SAT_MAX || color.b > BRT_MAX) {
         return -ENOTSUP;
     }
 
     state.color = color;
 
-    return 0;
-}
-
-struct zmk_led_hsb zmk_rgb_underglow_calc_hue(int direction) {
-    struct zmk_led_hsb color = state.color;
-
-    color.h += HUE_MAX + (direction * CONFIG_ZMK_RGB_UNDERGLOW_HUE_STEP);
-    color.h %= HUE_MAX;
-
-    return color;
-}
-
-struct zmk_led_hsb zmk_rgb_underglow_calc_sat(int direction) {
-    struct zmk_led_hsb color = state.color;
-
-    int s = color.s + (direction * CONFIG_ZMK_RGB_UNDERGLOW_SAT_STEP);
-    if (s < 0) {
-        s = 0;
-    } else if (s > SAT_MAX) {
-        s = SAT_MAX;
-    }
-    color.s = s;
-
-    return color;
-}
-
-struct zmk_led_hsb zmk_rgb_underglow_calc_brt(int direction) {
-    struct zmk_led_hsb color = state.color;
-
-    int b = color.b + (direction * CONFIG_ZMK_RGB_UNDERGLOW_BRT_STEP);
-    color.b = CLAMP(b, 0, BRT_MAX);
-
-    return color;
-}
-
-int zmk_rgb_underglow_change_hue(int direction) {
-    if (!led_strip)
-        return -ENODEV;
-
-    state.color = zmk_rgb_underglow_calc_hue(direction);
-
-    return zmk_rgb_underglow_save_state();
-}
-
-int zmk_rgb_underglow_change_sat(int direction) {
-    if (!led_strip)
-        return -ENODEV;
-
-    state.color = zmk_rgb_underglow_calc_sat(direction);
-
-    return zmk_rgb_underglow_save_state();
-}
-
-int zmk_rgb_underglow_change_brt(int direction) {
-    if (!led_strip)
-        return -ENODEV;
-
-    state.color = zmk_rgb_underglow_calc_brt(direction);
-
-    return zmk_rgb_underglow_save_state();
-}
-
-int zmk_rgb_underglow_change_spd(int direction) {
-    if (!led_strip)
-        return -ENODEV;
-
-    if (state.animation_speed == 1 && direction < 0) {
-        return 0;
-    }
-
-    state.animation_speed += direction;
-
-    if (state.animation_speed > 5) {
-        state.animation_speed = 5;
-    }
-
     return zmk_rgb_underglow_save_state();
 }
 
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_IDLE) ||                                          \
     IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
-static int rgb_underglow_auto_state(bool *prev_state, bool new_state) {
+static int rgb_underglow_auto_state(bool new_state) {
     if (state.on == new_state) {
         return 0;
     }
     if (new_state) {
-        state.on = *prev_state;
-        *prev_state = false;
-        return zmk_rgb_underglow_on();
+        return zmk_rgb_ug_on();
     } else {
-        state.on = false;
-        *prev_state = true;
-        return zmk_rgb_underglow_off();
+        return zmk_rgb_ug_off();
     }
 }
 
@@ -489,15 +397,14 @@ static int rgb_underglow_event_listener(const zmk_event_t *eh) {
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_IDLE)
     if (as_zmk_activity_state_changed(eh)) {
         static bool prev_state = false;
-        return rgb_underglow_auto_state(&prev_state,
-                                        zmk_activity_get_state() == ZMK_ACTIVITY_ACTIVE);
+        return rgb_underglow_auto_state(zmk_activity_get_state() == ZMK_ACTIVITY_ACTIVE);
     }
 #endif
 
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
     if (as_zmk_usb_conn_state_changed(eh)) {
         static bool prev_state = false;
-        return rgb_underglow_auto_state(&prev_state, zmk_usb_is_powered());
+        return rgb_underglow_auto_state(zmk_usb_is_powered());
     }
 #endif
 
@@ -522,14 +429,14 @@ static void rgb_underglow_status_timeout_work(struct k_work *work) {
 
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
     if (zmk_usb_is_powered()) {
-        zmk_rgb_underglow_set_hsb(color);
+        zmk_rgb_ug_set_hsb(color);
     } else {
-        zmk_rgb_underglow_off();
+        zmk_rgb_ug_off();
     }
     return;
 #endif
 
-    zmk_rgb_underglow_set_hsb(color);
+    zmk_rgb_ug_set_hsb(color);
 }
 
 K_WORK_DEFINE(underglow_timeout_work, rgb_underglow_status_timeout_work);
@@ -550,13 +457,13 @@ static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
     int ret = -ENOTSUP;
     if (sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_CRITICALLY_LOW_THRESHOLD) {
         struct zmk_led_hsb color = {h : 0, s : 100, b : 30};
-        ret = zmk_rgb_underglow_set_hsb(color);
+        ret = zmk_rgb_ug_set_hsb(color);
     } else if (sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_LOW_THRESHOLD) {
         struct zmk_led_hsb color = {h : 60, s : 100, b : 30};
-        ret = zmk_rgb_underglow_set_hsb(color);
+        ret = zmk_rgb_ug_set_hsb(color);
     } else {
         struct zmk_led_hsb color = {h : 120, s : 100, b : 30};
-        ret = zmk_rgb_underglow_set_hsb(color);
+        ret = zmk_rgb_ug_set_hsb(color);
     }
 
     k_timer_start(&underglow_timeout_timer, K_SECONDS(1), K_NO_WAIT);

@@ -57,7 +57,6 @@ struct rgb_underglow_state {
     struct zmk_led_hsb color;
     uint8_t animation_speed;
     uint8_t current_effect;
-    uint16_t animation_step;
     bool on;
 };
 
