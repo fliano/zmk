@@ -52,7 +52,7 @@ static int rgb_underglow_ble_state_event_listener(const zmk_event_t *eh) {
     if (sc.selected_endpoint.transport == ZMK_TRANSPORT_USB)
         return 0;
 
-    if (sc.selected_endpoint.active_profile_connected)
+    if (sc.active_profile_connected)
         k_timer_start(&underglow_timeout_timer, K_SECONDS(2), K_NO_WAIT);
 
     struct zmk_led_hsb color = {h : sc.selected_endpoint.ble.profile_index * 60, s : 100, b : 30};
