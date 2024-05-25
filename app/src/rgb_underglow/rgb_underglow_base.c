@@ -19,12 +19,7 @@
 
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 
-#include <zmk/activity.h>
 #include <zmk/usb.h>
-#include <zmk/event_manager.h>
-#include <zmk/events/activity_state_changed.h>
-#include <zmk/events/battery_state_changed.h>
-#include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/workqueue.h>
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
@@ -37,10 +32,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #define STRIP_CHOSEN DT_CHOSEN(zmk_underglow)
 #define STRIP_NUM_PIXELS DT_PROP(STRIP_CHOSEN, chain_length)
-
-#define HUE_MAX 360
-#define SAT_MAX 100
-#define BRT_MAX 100
 
 BUILD_ASSERT(CONFIG_ZMK_RGB_UNDERGLOW_BRT_MIN <= CONFIG_ZMK_RGB_UNDERGLOW_BRT_MAX,
              "ERROR: RGB underglow maximum brightness is less than minimum brightness");

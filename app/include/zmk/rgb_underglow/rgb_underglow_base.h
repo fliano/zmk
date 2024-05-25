@@ -6,6 +6,10 @@
 
 #pragma once
 
+#define HUE_MAX 360
+#define SAT_MAX 100
+#define BRT_MAX 100
+
 struct zmk_led_hsb {
     uint16_t h;
     uint8_t s;
