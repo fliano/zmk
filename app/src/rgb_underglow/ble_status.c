@@ -12,8 +12,8 @@
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 
 #include <zmk/event_manager.h>
-#include <zmk/events/endpoint_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
+#include <zmk/events/endpoint_changed.h>
 
 #include <zmk/usb.h>
 #include <zmk/ble.h>
@@ -36,17 +36,17 @@ static struct output_status_state get_state(const zmk_event_t *_eh) {
     ;
 }
 
-static void rgb_underglow_status_timeout_work(struct k_work *work) {
+static void rgb_underglow_ble_status_timeout_work(struct k_work *work) {
     zmk_rgb_underglow_apply_current_state();
 }
 
-K_WORK_DEFINE(underglow_timeout_work, rgb_underglow_status_timeout_work);
+K_WORK_DEFINE(underglow_ble_timeout_work, rgb_underglow_ble_status_timeout_work);
 
-static void rgb_underglow_status_timeout_timer(struct k_timer *timer) {
-    k_work_submit_to_queue(zmk_workqueue_lowprio_work_q(), &underglow_timeout_work);
+static void rgb_underglow_ble_status_timeout_timer(struct k_timer *timer) {
+    k_work_submit_to_queue(zmk_workqueue_lowprio_work_q(), &underglow_ble_timeout_work);
 }
 
-K_TIMER_DEFINE(underglow_timeout_timer, rgb_underglow_status_timeout_timer, NULL);
+K_TIMER_DEFINE(underglow_ble_timeout_timer, rgb_underglow_ble_status_timeout_timer, NULL);
 
 static int rgb_underglow_ble_state_event_listener(const zmk_event_t *eh) {
     const struct output_status_state sc = get_state(eh);
@@ -55,7 +55,7 @@ static int rgb_underglow_ble_state_event_listener(const zmk_event_t *eh) {
         return 0;
 
     if (sc.active_profile_connected)
-        k_timer_start(&underglow_timeout_timer, K_SECONDS(2), K_NO_WAIT);
+        k_timer_start(&underglow_ble_timeout_timer, K_SECONDS(2), K_NO_WAIT);
 
     struct zmk_led_hsb color = {h : sc.selected_endpoint.ble.profile_index * 60, s : 100, b : 30};
     zmk_rgb_ug_set_hsb(color);
