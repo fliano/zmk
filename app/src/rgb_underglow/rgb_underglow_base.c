@@ -367,48 +367,4 @@ int zmk_rgb_ug_set_hsb(struct zmk_led_hsb color) {
     return zmk_rgb_ug_save_state();
 }
 
-#if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_IDLE) ||                                          \
-    IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
-static int rgb_ug_auto_state(bool new_state) {
-    if (state.on == new_state) {
-        return 0;
-    }
-    if (new_state) {
-        return zmk_rgb_ug_on();
-    } else {
-        return zmk_rgb_ug_off();
-    }
-}
-
-static int rgb_ug_event_listener(const zmk_event_t *eh) {
-
-#if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_IDLE)
-    if (as_zmk_activity_state_changed(eh)) {
-        static bool prev_state = false;
-        return rgb_ug_auto_state(zmk_activity_get_state() == ZMK_ACTIVITY_ACTIVE);
-    }
-#endif
-
-#if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
-    if (as_zmk_usb_conn_state_changed(eh)) {
-        static bool prev_state = false;
-        return rgb_ug_auto_state(zmk_usb_is_powered());
-    }
-#endif
-
-    return -ENOTSUP;
-}
-
-ZMK_LISTENER(rgb_underglow, rgb_ug_event_listener);
-#endif // IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_IDLE) ||
-       // IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
-
-#if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_IDLE)
-ZMK_SUBSCRIPTION(rgb_underglow, zmk_activity_state_changed);
-#endif
-
-#if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
-ZMK_SUBSCRIPTION(rgb_underglow, zmk_usb_conn_state_changed);
-#endif
-
 SYS_INIT(zmk_rgb_ug_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
