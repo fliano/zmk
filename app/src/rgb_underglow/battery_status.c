@@ -1,3 +1,13 @@
+#include <zephyr/device.h>
+#include <zephyr/init.h>
+#include <zephyr/kernel.h>
+#include <zephyr/settings/settings.h>
+
+#include <math.h>
+#include <stdlib.h>
+
+#include <zephyr/logging/log.h>
+
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 #include <zmk/usb.h>
 #include <zmk/event_manager.h>
