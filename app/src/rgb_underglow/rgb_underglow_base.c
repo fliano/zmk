@@ -53,19 +53,11 @@ enum rgb_ug_effect {
     UNDERGLOW_EFFECT_NUMBER // Used to track number of underglow effects
 };
 
-struct rgb_ug_state {
-    struct zmk_led_hsb color;
-    uint8_t animation_speed;
-    uint8_t current_effect;
-    uint16_t animation_step;
-    bool on;
-};
-
 static const struct device *led_strip;
 
 static struct led_rgb pixels[STRIP_NUM_PIXELS];
 
-static struct rgb_ug_state state;
+static struct rgb_underglow_state state;
 
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_EXT_POWER)
 static const struct device *const ext_power = DEVICE_DT_GET(DT_INST(0, zmk_ext_power_generic));
@@ -250,17 +242,7 @@ static int zmk_rgb_ug_init(void) {
     }
 #endif
 
-    state = (struct rgb_ug_state){
-        color : {
-            h : CONFIG_ZMK_RGB_UNDERGLOW_HUE_START,
-            s : CONFIG_ZMK_RGB_UNDERGLOW_SAT_START,
-            b : CONFIG_ZMK_RGB_UNDERGLOW_BRT_START,
-        },
-        animation_speed : CONFIG_ZMK_RGB_UNDERGLOW_SPD_START,
-        current_effect : CONFIG_ZMK_RGB_UNDERGLOW_EFF_START,
-        animation_step : 0,
-        on : IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_ON_START)
-    };
+    state = default_rgb_settings;
 
 #if IS_ENABLED(CONFIG_SETTINGS)
     settings_subsys_init();
@@ -367,6 +349,20 @@ int zmk_rgb_ug_select_effect(int effect) {
     state.animation_step = 0;
 
     return zmk_rgb_ug_save_state();
+}
+
+int zmk_rgb_ug_set_spd(int speed) {
+    if (!led_strip)
+        return -ENODEV;
+
+    int clamped_speed = CLAMP(speed, 1, 5);
+
+    if (clamped_speed == state.animation_speed)
+        return 0;
+
+    state.animation_speed = clamped_speed;
+
+    return zmk_rgb_underglow_save_state();
 }
 
 int zmk_rgb_ug_set_hsb(struct zmk_led_hsb color) {
