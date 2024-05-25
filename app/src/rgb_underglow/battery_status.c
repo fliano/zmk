@@ -14,6 +14,8 @@
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/workqueue.h>
 
+LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
+
 static void rgb_underglow_status_timeout_work(struct k_work *work) {
     struct zmk_led_hsb color = {h : 240, s : 100, b : 100};
 
