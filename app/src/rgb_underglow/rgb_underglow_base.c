@@ -354,7 +354,7 @@ int zmk_rgb_ug_set_spd(int speed) {
 
     state.animation_speed = clamped_speed;
 
-    return zmk_rgb_underglow_save_state();
+    return zmk_rgb_ug_save_state();
 }
 
 int zmk_rgb_ug_set_hsb(struct zmk_led_hsb color) {
