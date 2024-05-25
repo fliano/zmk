@@ -10,12 +10,14 @@
 
 #include <zmk/rgb_underglow/current_status.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
+
+#include <zmk/event_manager.h>
+#include <zmk/events/endpoint_changed.h>
+#include <zmk/events/ble_active_profile_changed.h>
+
 #include <zmk/usb.h>
 #include <zmk/ble.h>
 #include <zmk/endpoints.h>
-#include <zmk/event_manager.h>
-#include <zmk/events/ble_active_profile_changed.h>
-#include <zmk/events/endpoint_changed.h>
 #include <zmk/workqueue.h>
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
