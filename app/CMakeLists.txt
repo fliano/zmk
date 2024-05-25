@@ -112,6 +112,9 @@ target_sources_ifdef(CONFIG_ZMK_USB app PRIVATE src/usb_hid.c)
 
 if (CONFIG_ZMK_RGB_UNDERGLOW)
   target_sources(app PRIVATE src/rgb_underglow/rgb_underglow_base.c)
+  target_sources(app PRIVATE src/rgb_underglow/battery_status.c)
+  target_sources(app PRIVATE src/rgb_underglow/ble_status.c)
+  target_sources(app PRIVATE src/rgb_underglow/current_status.c)
 endif()
 
 target_sources_ifdef(CONFIG_ZMK_BACKLIGHT app PRIVATE src/backlight.c)
