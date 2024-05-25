@@ -20,6 +20,14 @@ struct rgb_underglow_state {
     bool on;
 };
 
+enum rgb_underglow_effect {
+    UNDERGLOW_EFFECT_SOLID,
+    UNDERGLOW_EFFECT_BREATHE,
+    UNDERGLOW_EFFECT_SPECTRUM,
+    UNDERGLOW_EFFECT_SWIRL,
+    UNDERGLOW_EFFECT_NUMBER // Used to track number of underglow effects
+};
+
 static const struct rgb_underglow_state default_rgb_settings = (struct rgb_underglow_state){
     color : {
         h : CONFIG_ZMK_RGB_UNDERGLOW_HUE_START,
