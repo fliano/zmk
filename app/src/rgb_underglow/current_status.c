@@ -127,6 +127,29 @@ int zmk_rgb_underglow_change_spd(int direction) {
     return zmk_rgb_ug_set_spd(speed);
 }
 
+int zmk_rgb_underglow_apply_current_state(void) {
+
+#if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_IDLE)
+    if (zmk_activity_get_state() != ZMK_ACTIVITY_ACTIVE) {
+        return zmk_rgb_ug_off();
+    }
+#endif
+
+#if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
+    if (!zmk_usb_is_powered()) {
+        return zmk_rgb_ug_off();
+    }
+#endif
+
+    if (!zmk_rgb_ug_set_hsb(state.color) || !zmk_rgb_ug_set_spd(state.animation_speed) ||
+        !zmk_rgb_ug_select_effect(state.current_effect)) {
+        LOG_ERR("Failed to set the current rgb config");
+        return 0;
+    }
+
+    return state.on ? zmk_rgb_ug_on() : zmk_rgb_ug_off();
+}
+
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_IDLE) ||                                          \
     IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
 static int rgb_underglow_auto_state(bool new_state) {
