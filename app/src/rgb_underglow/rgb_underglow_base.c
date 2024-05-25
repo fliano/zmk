@@ -17,7 +17,7 @@
 #include <zephyr/drivers/led_strip.h>
 #include <drivers/ext_power.h>
 
-#include <zmk/rgb_underglow.h>
+#include <zmk/rgb_underglow/rgb_underglow_base.h>
 
 #include <zmk/activity.h>
 #include <zmk/usb.h>
