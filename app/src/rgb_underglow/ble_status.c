@@ -8,6 +8,7 @@
 
 #include <zephyr/logging/log.h>
 
+#include <zmk/rgb_underglow/ble_status.h>
 #include <zmk/rgb_underglow/current_status.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 
@@ -21,12 +22,6 @@
 #include <zmk/workqueue.h>
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
-
-struct output_state {
-    struct zmk_endpoint_instance selected_endpoint;
-    bool active_profile_connected;
-    bool active_profile_bonded;
-};
 
 static struct output_state get_output_state(const zmk_event_t *_eh) {
     return (struct output_state){.selected_endpoint = zmk_endpoints_selected(),
