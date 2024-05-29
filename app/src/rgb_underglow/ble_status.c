@@ -8,6 +8,7 @@
 
 #include <zephyr/logging/log.h>
 
+#include <zmk/rgb_underglow/status_on_startup.h>
 #include <zmk/rgb_underglow/ble_status.h>
 #include <zmk/rgb_underglow/current_status.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
@@ -30,6 +31,22 @@ static struct output_state get_output_state(const zmk_event_t *_eh) {
     ;
 }
 
+int zmk_rgb_underglow_set_color_ble(struct output_state os) {
+    if (os.selected_endpoint.transport == ZMK_TRANSPORT_BLE) {
+        if (os.active_profile_bonded) {
+            if (os.active_profile_connected) {
+                // animation speed 1 + breathing
+                return 0;
+            }
+            // animation speed 5 + breathing
+            return 0;
+        }
+        // animation speed 3 + breathing
+        return 0;
+    }
+    return 0;
+}
+
 static void rgb_underglow_ble_status_timeout_work(struct k_work *work) {
     zmk_rgb_underglow_apply_current_state();
 }
@@ -46,6 +63,9 @@ static int rgb_underglow_ble_state_event_listener(const zmk_event_t *eh) {
     const struct output_state sc = get_output_state(eh);
 
     if (sc.selected_endpoint.transport == ZMK_TRANSPORT_USB)
+        return 0;
+
+    if (is_starting_up())
         return 0;
 
     if (sc.active_profile_connected)

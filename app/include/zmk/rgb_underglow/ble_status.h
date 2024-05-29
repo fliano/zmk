@@ -6,3 +6,4 @@ struct output_state {
 };
 
 static struct output_state get_output_state(const zmk_event_t *_eh);
+int zmk_rgb_underglow_set_color_ble(struct output_state os);

@@ -9,6 +9,7 @@
 #include <zephyr/logging/log.h>
 
 #include <zmk/rgb_underglow/battery_status.h>
+#include <zmk/rgb_underglow/status_on_startup.h>
 #include <zmk/rgb_underglow/ble_status.h>
 #include <zmk/rgb_underglow/current_status.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
