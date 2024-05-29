@@ -17,6 +17,19 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
+int rgb_underglow_set_color_battery(uint8_t state_of_charge) {
+    if (state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_CRITICALLY_LOW_THRESHOLD) {
+        struct zmk_led_hsb color = {h : 0, s : 100, b : 30};
+        return zmk_rgb_ug_set_hsb(color);
+    } else if (state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_LOW_THRESHOLD) {
+        struct zmk_led_hsb color = {h : 60, s : 100, b : 30};
+        return zmk_rgb_ug_set_hsb(color);
+    } else {
+        struct zmk_led_hsb color = {h : 120, s : 100, b : 30};
+        return zmk_rgb_ug_set_hsb(color);
+    }
+}
+
 static void rgb_underglow_status_timeout_work(struct k_work *work) {
     zmk_rgb_underglow_apply_current_state();
 }
@@ -37,17 +50,7 @@ static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
     }
 
     k_timer_start(&underglow_timeout_timer, K_SECONDS(1), K_NO_WAIT);
-
-    if (sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_CRITICALLY_LOW_THRESHOLD) {
-        struct zmk_led_hsb color = {h : 0, s : 100, b : 30};
-        return zmk_rgb_ug_set_hsb(color);
-    } else if (sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_LOW_THRESHOLD) {
-        struct zmk_led_hsb color = {h : 60, s : 100, b : 30};
-        return zmk_rgb_ug_set_hsb(color);
-    } else {
-        struct zmk_led_hsb color = {h : 120, s : 100, b : 30};
-        return zmk_rgb_ug_set_hsb(color);
-    }
+    rgb_underglow_set_color_battery(sc->state_of_charge);
 }
 
 ZMK_LISTENER(rgb_battery, rgb_underglow_battery_state_event_listener);
