@@ -116,6 +116,7 @@ if (CONFIG_ZMK_RGB_UNDERGLOW)
   target_sources_ifdef(CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS app PRIVATE src/rgb_underglow/battery_status.c)
   if (CONFIG_ZMK_SPLIT_ROLE_CENTRAL AND CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS)
     target_sources(app PRIVATE src/rgb_underglow/ble_status.c)
+    target_sources(app PRIVATE src/rgb_underglow/status_on_startup.c)
   endif()
 endif()
 
