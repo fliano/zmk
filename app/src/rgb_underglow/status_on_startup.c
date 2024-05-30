@@ -79,7 +79,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
 
 K_WORK_DEFINE(on_startup_timer_tick_work, zmk_on_startup_timer_tick_work);
 
-static void on_startup_timer_tick_stop_cb(struct k_timer *timer) { k_mutex_unlock(&startup_mutex); }
+static void on_startup_timer_tick_stop_cb(struct k_timer *timer) { stop_startup(); }
 
 static void on_startup_timer_tick_cb(struct k_timer *timer) {
     running_timer = timer;
@@ -97,7 +97,7 @@ int startup_handler(const zmk_event_t *eh) {
     switch (ev->state) {
     case ZMK_ACTIVITY_ACTIVE:
         if (last_activity_state == ZMK_ACTIVITY_SLEEP) {
-            if (k_mutex_lock(&startup_mutex, K_NO_WAIT)) {
+            if (!start_startup()) {
                 LOG_ERR("already starting up");
                 break;
             }
