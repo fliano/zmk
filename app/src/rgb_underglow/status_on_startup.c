@@ -29,7 +29,7 @@ enum STARTUP_STATE {
     CONNECTING,
     CONNECTED,
 };
-static struct zmk_activity_state_changed last_activity_state = ZMK_ACTIVITY_SLEEP;
+static enum zmk_activity_state last_activity_state = ZMK_ACTIVITY_SLEEP;
 static int64_t last_checkpoint = 0;
 static enum STARTUP_STATE startup_state = BATTERY;
 
