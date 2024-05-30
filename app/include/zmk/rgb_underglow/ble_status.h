@@ -1,3 +1,5 @@
+#include <zmk/endpoints.h>
+#include <zmk/event_manager.h>
 
 struct output_state {
     struct zmk_endpoint_instance selected_endpoint;
