@@ -100,8 +100,8 @@ int startup_handler(const zmk_event_t *eh) {
     switch (ev->state) {
     case ZMK_ACTIVITY_ACTIVE:
         if (last_activity_state == ZMK_ACTIVITY_SLEEP) {
-            if (!k_mutex_lock(&startup_mutex, K_NO_WAIT)) {
-                LOG_ERR("mutex not lockable on startup");
+            if (is_starting_up()) {
+                LOG_ERR("already starting up");
                 break;
             }
 
@@ -110,6 +110,10 @@ int startup_handler(const zmk_event_t *eh) {
             k_timer_start(&on_startup_timer_tick, K_NO_WAIT, K_MSEC(100));
             break;
         }
+    default:
+        if (is_starting_up())
+            k_timer_stop(&on_startup_timer_tick);
+        break;
     }
 
     last_activity_state = ev->state;
