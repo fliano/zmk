@@ -117,6 +117,7 @@ if (CONFIG_ZMK_RGB_UNDERGLOW)
   if (CONFIG_ZMK_SPLIT_ROLE_CENTRAL AND CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS)
     target_sources(app PRIVATE src/rgb_underglow/ble_status.c)
     target_sources(app PRIVATE src/rgb_underglow/status_on_startup.c)
+    target_sources(app PRIVATE src/rgb_underglow/startup_mutex.c)
   endif()
 endif()
 
