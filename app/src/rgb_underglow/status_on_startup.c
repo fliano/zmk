@@ -82,7 +82,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     }
 }
 
-K_WORK_DEFINE(on_startup_timer_tick_work, zmk_on_startup_timer_tick_work)
+K_WORK_DEFINE(on_startup_timer_tick_work, zmk_on_startup_timer_tick_work);
 
 static void on_startup_timer_tick_cb(struct k_timer *timer) {
     running_timer = timer;
