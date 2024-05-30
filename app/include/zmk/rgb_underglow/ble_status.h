@@ -1,3 +1,5 @@
+#pragma once
+
 #include <zmk/endpoints.h>
 #include <zmk/event_manager.h>
 
