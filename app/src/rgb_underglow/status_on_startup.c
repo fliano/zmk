@@ -32,9 +32,10 @@ enum STARTUP_STATE {
 static enum zmk_activity_state last_activity_state = ZMK_ACTIVITY_SLEEP;
 static int64_t last_checkpoint = 0;
 static enum STARTUP_STATE startup_state = BATTERY;
+static struct k_timer *running_timer;
 
 bool is_starting_up() {
-    if (k_timer_remaining_get(&on_startup_timer_tick) > 0) {
+    if (k_timer_remaining_get(&running_timer) > 0) {
         return true;
     } else {
         return false;
@@ -46,7 +47,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     struct output_state os = get_output_state(NULL);
 
     if (os.selected_endpoint.transport == ZMK_TRANSPORT_USB) {
-        k_timer_stop(&on_startup_timer_tick);
+        k_timer_stop(&running_timer);
         zmk_rgb_underglow_apply_current_state();
         return;
     }
@@ -59,7 +60,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
             last_checkpoint = uptime;
             break;
         case CONNECTED:
-            k_timer_stop(&on_startup_timer_tick); // probably won't work
+            k_timer_stop(&running_timer); // probably won't work
             zmk_rgb_underglow_apply_current_state();
             return;
         }
@@ -84,6 +85,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
 K_WORK_DEFINE(on_startup_timer_tick_work, zmk_on_startup_timer_tick_work)
 
 static void on_startup_timer_tick_cb(struct k_timer *timer) {
+    running_timer = timer;
     k_work_submit_to_queue(zmk_workqueue_lowprio_work_q(), &on_startup_timer_tick_work);
 }
 
