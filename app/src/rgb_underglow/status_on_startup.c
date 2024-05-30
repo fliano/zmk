@@ -39,7 +39,7 @@ static struct k_timer *running_timer;
 
 static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     uint8_t state_of_charge = zmk_battery_state_of_charge();
-    struct output_state os = get_output_state(NULL);
+    struct output_state os = zmk_get_output_state(NULL);
 
     if (os.selected_endpoint.transport == ZMK_TRANSPORT_USB) {
         k_timer_stop(running_timer);

@@ -24,7 +24,7 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-static struct output_state get_output_state(const zmk_event_t *_eh) {
+static struct output_state zmk_get_output_state(const zmk_event_t *_eh) {
     return (struct output_state){.selected_endpoint = zmk_endpoints_selected(),
                                  .active_profile_connected = zmk_ble_active_profile_is_connected(),
                                  .active_profile_bonded = !zmk_ble_active_profile_is_open()};
@@ -61,7 +61,7 @@ static void rgb_underglow_ble_status_timeout_timer(struct k_timer *timer) {
 K_TIMER_DEFINE(underglow_ble_timeout_timer, rgb_underglow_ble_status_timeout_timer, NULL);
 
 static int rgb_underglow_ble_state_event_listener(const zmk_event_t *eh) {
-    const struct output_state sc = get_output_state(eh);
+    const struct output_state sc = zmk_get_output_state(eh);
 
     if (sc.selected_endpoint.transport == ZMK_TRANSPORT_USB)
         return 0;
