@@ -8,6 +8,7 @@
 
 #include <zephyr/logging/log.h>
 
+#include <zmk/rgb_underglow/battery_status.h>
 #include <zmk/rgb_underglow/current_status.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 #include <zmk/rgb_underglow/startup_mutex.h>
