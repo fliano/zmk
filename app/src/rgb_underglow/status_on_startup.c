@@ -35,7 +35,7 @@ static enum STARTUP_STATE startup_state = BATTERY;
 static struct k_timer *running_timer;
 
 bool is_starting_up() {
-    if (k_timer_remaining_get(&running_timer) > 0) {
+    if (k_timer_remaining_get(running_timer) > 0) {
         return true;
     } else {
         return false;
@@ -47,7 +47,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     struct output_state os = get_output_state(NULL);
 
     if (os.selected_endpoint.transport == ZMK_TRANSPORT_USB) {
-        k_timer_stop(&running_timer);
+        k_timer_stop(running_timer);
         zmk_rgb_underglow_apply_current_state();
         return;
     }
@@ -60,7 +60,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
             last_checkpoint = uptime;
             break;
         case CONNECTED:
-            k_timer_stop(&running_timer); // probably won't work
+            k_timer_stop(running_timer); // probably won't work
             zmk_rgb_underglow_apply_current_state();
             return;
         }
