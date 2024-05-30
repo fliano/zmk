@@ -12,6 +12,7 @@
 #include <zmk/rgb_underglow/ble_status.h>
 #include <zmk/rgb_underglow/current_status.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
+#include <zmk/rgb_underglow/startup_mutex.h>
 
 #include <zmk/event_manager.h>
 #include <zmk/events/ble_active_profile_changed.h>

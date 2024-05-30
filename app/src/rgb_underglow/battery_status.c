@@ -11,6 +11,7 @@
 #include <zmk/rgb_underglow/status_on_startup.h>
 #include <zmk/rgb_underglow/current_status.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
+#include <zmk/rgb_underglow/startup_mutex.h>
 #include <zmk/usb.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/battery_state_changed.h>

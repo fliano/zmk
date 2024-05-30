@@ -13,6 +13,7 @@
 #include <zmk/rgb_underglow/ble_status.h>
 #include <zmk/rgb_underglow/current_status.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
+#include <zmk/rgb_underglow/startup_mutex.h>
 
 #include <zmk/event_manager.h>
 #include <zmk/events/activity_state_changed.h>
@@ -35,14 +36,6 @@ static enum zmk_activity_state last_activity_state = ZMK_ACTIVITY_SLEEP;
 static int64_t last_checkpoint = 0;
 static enum STARTUP_STATE startup_state = BATTERY;
 static struct k_timer *running_timer;
-
-bool is_starting_up() {
-    if (k_timer_remaining_get(running_timer) > 0) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
 static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     uint8_t state_of_charge = zmk_battery_state_of_charge();
@@ -86,6 +79,8 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
 
 K_WORK_DEFINE(on_startup_timer_tick_work, zmk_on_startup_timer_tick_work);
 
+static void on_startup_timer_tick_stop_cb(struct k_timer *timer) { k_mutex_unlock(&startup_mutex); }
+
 static void on_startup_timer_tick_cb(struct k_timer *timer) {
     running_timer = timer;
     k_work_submit_to_queue(zmk_workqueue_lowprio_work_q(), &on_startup_timer_tick_work);
@@ -107,6 +102,7 @@ int startup_handler(const zmk_event_t *eh) {
                 break;
             }
 
+            k_mutex_lock(&startup_mutex);
             startup_state = BATTERY;
             last_checkpoint = k_uptime_get();
             k_timer_start(&on_startup_timer_tick, K_NO_WAIT, K_MSEC(100));
