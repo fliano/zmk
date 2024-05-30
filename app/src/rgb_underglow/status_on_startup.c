@@ -15,6 +15,7 @@
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 
 #include <zmk/event_manager.h>
+#include <zmk/events/activity_state_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/endpoint_changed.h>
 
