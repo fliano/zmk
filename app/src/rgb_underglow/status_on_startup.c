@@ -24,6 +24,8 @@
 #include <zmk/endpoints.h>
 #include <zmk/workqueue.h>
 
+LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
+
 enum STARTUP_STATE {
     BATTERY,
     CONNECTING,
