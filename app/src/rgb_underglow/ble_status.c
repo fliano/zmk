@@ -35,14 +35,15 @@ int zmk_rgb_underglow_set_color_ble(struct output_state os) {
     if (os.selected_endpoint.transport == ZMK_TRANSPORT_BLE) {
         if (os.active_profile_bonded) {
             if (os.active_profile_connected) {
-                // animation speed 1 + breathing
-                return 0;
+                struct zmk_led_hsb color = {h : 300, s : 100, b : 30};
+                return zmk_rgb_ug_set_hsb(color);
             }
-            // animation speed 5 + breathing
-            return 0;
+            struct zmk_led_hsb color = {h : 180, s : 100, b : 30};
+            return zmk_rgb_ug_set_hsb(color);
         }
-        // animation speed 3 + breathing
-        return 0;
+        struct zmk_led_hsb color = {h : 240, s : 100, b : 30};
+
+        return zmk_rgb_ug_set_hsb(color);
     }
     return 0;
 }
