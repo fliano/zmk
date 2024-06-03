@@ -9,5 +9,5 @@ struct output_state {
     bool active_profile_bonded;
 };
 
-static struct output_state zmk_get_output_state(void);
+struct output_state zmk_get_output_state(void);
 int zmk_rgb_underglow_set_color_ble(struct output_state os);
