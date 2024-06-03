@@ -24,7 +24,7 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-static struct output_state zmk_get_output_state() {
+struct output_state zmk_get_output_state() {
     return (struct output_state){.selected_endpoint = zmk_endpoints_selected(),
                                  .active_profile_connected = zmk_ble_active_profile_is_connected(),
                                  .active_profile_bonded = !zmk_ble_active_profile_is_open()};
