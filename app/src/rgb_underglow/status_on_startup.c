@@ -52,8 +52,8 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     if (last_checkpoint + 3000 < uptime && startup_state != CONNECTING) {
         switch (startup_state) {
         case BATTERY:
-            startup_state = CONNECTED // os.active_profile_connected ? CONNECTED : CONNECTING;
-                last_checkpoint = uptime;
+            startup_state = CONNECTED; // os.active_profile_connected ? CONNECTED : CONNECTING;
+            last_checkpoint = uptime;
             break;
         case CONNECTED:
             k_timer_stop(running_timer); // probably won't work
