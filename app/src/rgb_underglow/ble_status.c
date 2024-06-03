@@ -66,8 +66,8 @@ static int rgb_underglow_ble_state_event_listener(const zmk_event_t *eh) {
     if (sc.selected_endpoint.transport == ZMK_TRANSPORT_USB)
         return 0;
 
-    /*if (is_starting_up())*/
-    /*return 0;*/
+    if (is_starting_up())
+        return 0;
 
     if (sc.active_profile_connected)
         k_timer_start(&underglow_ble_timeout_timer, K_SECONDS(2), K_NO_WAIT);
