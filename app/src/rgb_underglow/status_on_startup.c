@@ -40,20 +40,20 @@ static struct k_timer *running_timer;
 static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     uint8_t state_of_charge = zmk_battery_state_of_charge();
     const zmk_event_t *ev = NULL;
-    struct output_state os = zmk_get_output_state(ev);
+    /*struct output_state os = zmk_get_output_state(ev);*/
 
-    if (os.selected_endpoint.transport == ZMK_TRANSPORT_USB) {
-        k_timer_stop(running_timer);
-        zmk_rgb_underglow_apply_current_state();
-        return;
-    }
+    /*if (os.selected_endpoint.transport == ZMK_TRANSPORT_USB) {*/
+    /*k_timer_stop(running_timer);*/
+    /*zmk_rgb_underglow_apply_current_state();*/
+    /*return;*/
+    /*}*/
 
     int64_t uptime = k_uptime_get();
     if (last_checkpoint + 3000 < uptime && startup_state != CONNECTING) {
         switch (startup_state) {
         case BATTERY:
-            startup_state = os.active_profile_connected ? CONNECTED : CONNECTING;
-            last_checkpoint = uptime;
+            startup_state = CONNECTED // os.active_profile_connected ? CONNECTED : CONNECTING;
+                last_checkpoint = uptime;
             break;
         case CONNECTED:
             k_timer_stop(running_timer); // probably won't work
@@ -62,10 +62,10 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
         }
     }
 
-    if (startup_state == CONNECTING && os.active_profile_connected) {
-        startup_state = CONNECTED;
-        last_checkpoint = uptime;
-    }
+    /*if (startup_state == CONNECTING && os.active_profile_connected) {*/
+    /*startup_state = CONNECTED;*/
+    /*last_checkpoint = uptime;*/
+    /*}*/
 
     switch (startup_state) {
     case BATTERY:
@@ -73,7 +73,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
         return;
     case CONNECTING:
     case CONNECTED:
-        zmk_rgb_underglow_set_color_ble(os);
+        /*zmk_rgb_underglow_set_color_ble(os);*/
         return;
     }
 }
