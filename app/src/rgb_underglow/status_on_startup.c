@@ -38,6 +38,7 @@ static enum STARTUP_STATE startup_state = BATTERY;
 static struct k_timer *running_timer;
 
 static void zmk_on_startup_timer_tick_work(struct k_work *work) {
+    LOG_INF("work");
     uint8_t state_of_charge = zmk_battery_state_of_charge();
     struct output_state os = zmk_get_output_state();
 
@@ -88,6 +89,7 @@ static void on_startup_timer_tick_cb(struct k_timer *timer) {
     running_timer = timer;
     LOG_INF("startup timer running");
     k_work_submit_to_queue(zmk_workqueue_lowprio_work_q(), &on_startup_timer_tick_work);
+    LOG_INF("startup timer running aftermath");
 }
 
 K_TIMER_DEFINE(on_startup_timer_tick, on_startup_timer_tick_cb, NULL);
