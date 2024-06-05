@@ -105,7 +105,7 @@ int startup_handler(const zmk_event_t *eh) {
         /*if (last_activity_state == ZMK_ACTIVITY_SLEEP) {*/
         if (!start_startup()) {
             LOG_ERR("already starting up");
-            break;
+            /*break;*/
         }
         LOG_INF("change the rgb color on startup");
         startup_state = BATTERY;
