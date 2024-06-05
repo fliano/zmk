@@ -94,6 +94,8 @@ int startup_handler(const zmk_event_t *eh) {
         return -ENOTSUP;
     }
 
+    LOG_INF("activity state changed %d %d %d, %d", ZMK_ACTIVITY_ACTIVE, ZMK_ACTIVITY_IDLE,
+            ZMK_ACTIVITY_SLEEP, ev->state);
     switch (ev->state) {
     case ZMK_ACTIVITY_ACTIVE:
         if (last_activity_state == ZMK_ACTIVITY_SLEEP) {
@@ -101,12 +103,14 @@ int startup_handler(const zmk_event_t *eh) {
                 LOG_ERR("already starting up");
                 break;
             }
+            LOG_INF("change the rgb color on startup");
             startup_state = BATTERY;
             last_checkpoint = k_uptime_get();
             k_timer_start(&on_startup_timer_tick, K_NO_WAIT, K_MSEC(100));
             break;
         }
     default:
+        LOG_INF("defaulting and not changing color");
         if (is_starting_up())
             k_timer_stop(&on_startup_timer_tick);
         break;
