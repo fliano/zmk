@@ -7,7 +7,6 @@ K_MUTEX_DEFINE(startup_mutex);
 
 bool is_starting_up() {
     if (k_mutex_lock(&startup_mutex, K_NO_WAIT) != 0) {
-        LOG_WRN("is runnnig");
         return true;
     } else {
         k_mutex_unlock(&startup_mutex);
@@ -26,9 +25,8 @@ bool start_startup() {
 
 void stop_startup() {
     if (!is_starting_up()) {
-        LOG_ERR("stopping non running startup");
+        LOG_WRN("stopping non running startup");
         return;
     }
-    LOG_WRN("unlocking mutex");
     k_mutex_unlock(&startup_mutex);
 }
