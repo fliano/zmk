@@ -79,10 +79,14 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
 
 K_WORK_DEFINE(on_startup_timer_tick_work, zmk_on_startup_timer_tick_work);
 
-static void on_startup_timer_tick_stop_cb(struct k_timer *timer) { stop_startup(); }
+static void on_startup_timer_tick_stop_cb(struct k_timer *timer) {
+    LOG_INF("startup timer stopped");
+    stop_startup();
+}
 
 static void on_startup_timer_tick_cb(struct k_timer *timer) {
     running_timer = timer;
+    LOG_INF("startup timer running");
     k_work_submit_to_queue(zmk_workqueue_lowprio_work_q(), &on_startup_timer_tick_work);
 }
 
