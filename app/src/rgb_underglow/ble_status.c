@@ -78,8 +78,8 @@ static int rgb_underglow_ble_state_event_listener(const zmk_event_t *eh) {
 }
 
 ZMK_LISTENER(rgb_ble, rgb_underglow_ble_state_event_listener);
-ZMK_SUBSCRIPTION(rgb_ble, zmk_endpoint_changed);
-
-#if defined(CONFIG_ZMK_BLE)
-ZMK_SUBSCRIPTION(rgb_ble, zmk_ble_active_profile_changed);
-#endif
+/*ZMK_SUBSCRIPTION(rgb_ble, zmk_endpoint_changed);*/
+/**/
+/*#if defined(CONFIG_ZMK_BLE)*/
+/*ZMK_SUBSCRIPTION(rgb_ble, zmk_ble_active_profile_changed);*/
+/*#endif*/

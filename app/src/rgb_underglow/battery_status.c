@@ -60,4 +60,4 @@ static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
 }
 
 ZMK_LISTENER(rgb_battery, rgb_underglow_battery_state_event_listener);
-ZMK_SUBSCRIPTION(rgb_battery, zmk_battery_state_changed);
+/*ZMK_SUBSCRIPTION(rgb_battery, zmk_battery_state_changed);*/
