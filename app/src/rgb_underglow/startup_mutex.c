@@ -3,7 +3,7 @@
 K_MUTEX_DEFINE(startup_mutex);
 
 bool is_starting_up() {
-    if (!k_mutex_lock(&startup_mutex, K_NO_WAIT)) {
+    if (k_mutex_lock(&startup_mutex, K_NO_WAIT) != 0) {
         return true;
     } else {
         k_mutex_unlock(&startup_mutex);
@@ -12,7 +12,7 @@ bool is_starting_up() {
 }
 
 bool start_startup() {
-    if (!k_mutex_lock(&startup_mutex, K_NO_WAIT)) {
+    if (k_mutex_lock(&startup_mutex, K_NO_WAIT) != 0) {
         return false;
     }
     return true;
