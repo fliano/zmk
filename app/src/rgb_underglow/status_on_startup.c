@@ -110,7 +110,7 @@ int startup_handler(const zmk_event_t *eh) {
         LOG_INF("change the rgb color on startup");
         startup_state = BATTERY;
         last_checkpoint = k_uptime_get();
-        k_timer_start(&on_startup_timer_tick, K_NO_WAIT, K_MSEC(100));
+        k_timer_start(&on_startup_timer_tick, K_MSEC(100), K_MSEC(100));
         break;
         /*}*/
     default:
