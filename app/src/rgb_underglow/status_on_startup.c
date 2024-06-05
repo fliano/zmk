@@ -38,7 +38,7 @@ static enum STARTUP_STATE startup_state = BATTERY;
 static struct k_timer *running_timer;
 
 static void zmk_on_startup_timer_tick_work(struct k_work *work) {
-    LOG_INF("work");
+    LOG_WRN("work");
     uint8_t state_of_charge = zmk_battery_state_of_charge();
     struct output_state os = zmk_get_output_state();
 
@@ -81,18 +81,16 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
 K_WORK_DEFINE(on_startup_timer_tick_work, zmk_on_startup_timer_tick_work);
 
 static void on_startup_timer_tick_stop_cb(struct k_timer *timer) {
-    LOG_INF("startup timer stopped");
+    LOG_WRN("startup timer stopped");
     stop_startup();
 }
 
 static void on_startup_timer_tick_cb(struct k_timer *timer) {
     running_timer = timer;
-    LOG_INF("startup timer running");
     k_work_submit_to_queue(zmk_workqueue_lowprio_work_q(), &on_startup_timer_tick_work);
-    LOG_INF("startup timer running aftermath");
 }
 
-K_TIMER_DEFINE(on_startup_timer_tick, on_startup_timer_tick_cb, NULL);
+K_TIMER_DEFINE(on_startup_timer_tick, on_startup_timer_tick_cb, on_startup_timer_tick_stop_cb);
 
 int startup_handler(const zmk_event_t *eh) {
     struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
@@ -109,7 +107,6 @@ int startup_handler(const zmk_event_t *eh) {
             LOG_ERR("already starting up");
             /*break;*/
         }
-        LOG_INF("change the rgb color on startup");
         startup_state = BATTERY;
         last_checkpoint = k_uptime_get();
         k_timer_start(&on_startup_timer_tick, K_MSEC(100), K_MSEC(100));
@@ -117,8 +114,10 @@ int startup_handler(const zmk_event_t *eh) {
         /*}*/
     default:
         LOG_INF("defaulting and not changing color");
-        if (is_starting_up())
+        if (is_starting_up()) {
+            LOG_WRN("stopping timer incomind");
             k_timer_stop(&on_startup_timer_tick);
+        }
         break;
     }
 
