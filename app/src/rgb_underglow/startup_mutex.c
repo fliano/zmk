@@ -1,4 +1,7 @@
+#include <zephyr/logging/log.h>
 #include <zmk/rgb_underglow/startup_mutex.h>
+
+LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 K_MUTEX_DEFINE(startup_mutex);
 
