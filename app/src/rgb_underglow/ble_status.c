@@ -35,7 +35,7 @@ int zmk_rgb_underglow_set_color_ble(struct output_state os) {
     if (os.selected_endpoint.transport == ZMK_TRANSPORT_BLE) {
         if (os.active_profile_bonded) {
             if (os.active_profile_connected) {
-                struct zmk_led_hsb color = {h : 300, s : 100, b : 30};
+                struct zmk_led_hsb color = {h : 0, s : 100, b : 30};
                 return zmk_rgb_ug_set_hsb(color);
             }
             struct zmk_led_hsb color = {h : 180, s : 100, b : 30};
