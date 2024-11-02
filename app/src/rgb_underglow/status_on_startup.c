@@ -105,7 +105,7 @@ int startup_handler(const zmk_event_t *eh) {
             ZMK_ACTIVITY_SLEEP, ev->state);
     switch (ev->state) {
     case ZMK_ACTIVITY_ACTIVE:
-        if (last_activity_state == ZMK_ACTIVITY_SLEEP) {
+        if (last_activity_state == ZMK_ACTIVITY_IDLE) {
             if (!start_startup()) {
                 LOG_ERR("already starting up");
                 break;
