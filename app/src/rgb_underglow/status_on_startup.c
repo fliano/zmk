@@ -47,14 +47,18 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
         return;
     }
 
+    LOG_INF("state %d", startup_state);
+
     int64_t uptime = k_uptime_get();
     if (last_checkpoint + 3000 < uptime && startup_state != CONNECTING) {
         switch (startup_state) {
         case BATTERY:
+            LOG_INF("battery to connectiing/connected");
             startup_state = os.active_profile_connected ? CONNECTED : CONNECTING;
             last_checkpoint = uptime;
             break;
         case CONNECTED:
+            LOG_INF("stop timer after connected");
             k_timer_stop(running_timer); // probably won't work
             zmk_rgb_underglow_apply_current_state();
             return;
@@ -62,16 +66,19 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     }
 
     if (startup_state == CONNECTING && os.active_profile_connected) {
+        LOG_INF("connecting -> connected");
         startup_state = CONNECTED;
         last_checkpoint = uptime;
     }
 
     switch (startup_state) {
     case BATTERY:
+        LOG_INF("set to battery col");
         rgb_underglow_set_color_battery(state_of_charge);
         return;
     case CONNECTING:
     case CONNECTED:
+        LOG_INF("set battery col");
         zmk_rgb_underglow_set_color_ble(os);
         return;
     }
