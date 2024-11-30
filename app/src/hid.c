@@ -28,7 +28,7 @@ static uint8_t keys_held = 0;
 #if IS_ENABLED(CONFIG_ZMK_MOUSE)
 
 static struct zmk_hid_mouse_report mouse_report = {.report_id = ZMK_HID_REPORT_ID_MOUSE,
-                                                   .body = {.buttons = 0}};
+                                                   .body = {.buttons = 0, .d_x = 0, .d_y = 0}};
 
 #endif // IS_ENABLED(CONFIG_ZMK_MOUSE)
 
@@ -431,6 +431,14 @@ int zmk_hid_mouse_buttons_release(zmk_mouse_button_flags_t buttons) {
     }
     return 0;
 }
+
+int zmk_hid_mouse_move(int8_t dx, int8_t dy) {
+    LOG_DBG("Move mouse d_x: %d, d_y: %d", dx, dy);
+    mouse_report.body.d_x = dx;
+    mouse_report.body.d_y = dy;
+    return 0;
+}
+
 void zmk_hid_mouse_clear(void) { memset(&mouse_report.body, 0, sizeof(mouse_report.body)); }
 
 #endif // IS_ENABLED(CONFIG_ZMK_MOUSE)

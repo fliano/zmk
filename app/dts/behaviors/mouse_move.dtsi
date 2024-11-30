@@ -1,0 +1,19 @@
+/*
+ * Copyright (c) 2023 The ZMK Contributors
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+ #include <dt-bindings/zmk/behaviors.h>
+
+/ {
+    behaviors {
+#if ZMK_BEHAVIOR_OMIT(MM)
+        /omit-if-no-ref/
+#endif
+        mm: mouse_move {
+            compatible = "zmk,behavior-mouse-move";
+            #binding-cells = <1>;
+        };
+    };
+};

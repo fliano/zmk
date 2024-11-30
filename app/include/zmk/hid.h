@@ -301,6 +301,7 @@ int zmk_hid_mouse_button_press(zmk_mouse_button_t button);
 int zmk_hid_mouse_button_release(zmk_mouse_button_t button);
 int zmk_hid_mouse_buttons_press(zmk_mouse_button_flags_t buttons);
 int zmk_hid_mouse_buttons_release(zmk_mouse_button_flags_t buttons);
+int zmk_hid_mouse_move(int8_t dx, int8_t dy);
 void zmk_hid_mouse_clear(void);
 #endif // IS_ENABLED(CONFIG_ZMK_MOUSE)
 

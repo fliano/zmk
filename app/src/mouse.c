@@ -10,6 +10,7 @@
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #include <zmk/events/mouse_button_state_changed.h>
+#include <zmk/events/mouse_move_state_changed.h>
 #include <zmk/hid.h>
 #include <zmk/endpoints.h>
 #include <zmk/mouse.h>
@@ -26,6 +27,12 @@ static void listener_mouse_button_released(const struct zmk_mouse_button_state_c
     zmk_endpoints_send_mouse_report();
 }
 
+static void listener_mouse_move(const struct zmk_mouse_move_state_changed *ev) {
+    LOG_DBG("hor: %d vert: %d", ev->d_x, ev->d_y);
+    zmk_hid_mouse_move(ev->d_x, ev->d_y);
+    zmk_endpoints_send_mouse_report();
+}
+
 int mouse_listener(const zmk_event_t *eh) {
     const struct zmk_mouse_button_state_changed *mbt_ev = as_zmk_mouse_button_state_changed(eh);
     if (mbt_ev) {
@@ -36,8 +43,14 @@ int mouse_listener(const zmk_event_t *eh) {
         }
         return 0;
     }
+    const struct zmk_mouse_move_state_changed *mms_ev = as_zmk_mouse_move_state_changed(eh);
+    if (mms_ev) {
+        listener_mouse_move(mms_ev);
+        return 0;
+    }
     return 0;
 }
 
 ZMK_LISTENER(mouse_listener, mouse_listener);
 ZMK_SUBSCRIPTION(mouse_listener, zmk_mouse_button_state_changed);
+ZMK_SUBSCRIPTION(mouse_listener, zmk_mouse_move_state_changed);
