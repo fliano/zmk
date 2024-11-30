@@ -74,6 +74,12 @@ config ZMK_BEHAVIOR_MOUSE_KEY_PRESS
     depends on DT_HAS_ZMK_BEHAVIOR_MOUSE_KEY_PRESS_ENABLED
     imply ZMK_MOUSE
 
+config ZMK_BEHAVIOR_MOUSE_MOVE
+    bool
+    default y
+    depends on DT_HAS_ZMK_BEHAVIOR_MOUSE_MOVE_ENABLED
+    imply ZMK_MOUSE
+
 config ZMK_BEHAVIOR_STICKY_KEY
     bool
     default y

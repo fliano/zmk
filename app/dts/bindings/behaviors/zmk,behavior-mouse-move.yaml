@@ -1,0 +1,5 @@
+description: Mouse move behavior
+
+compatible: "zmk,behavior-mouse-move"
+
+include: one_param.yaml
