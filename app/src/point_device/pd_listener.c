@@ -38,8 +38,8 @@ static void pd_process_msgq(struct k_work *work) {
             LOG_INF("Send pd position data (%d, %d)", msg.x, msg.y);
             zmk_hid_mouse_movement_set(0, 0);
             zmk_hid_mouse_scroll_set(0, 0);
-            zmk_hid_mouse_movement_update(CLAMP(msg.x, INT8_MIN, INT8_MAX),
-                                          CLAMP(msg.y, INT8_MIN, INT8_MAX));
+            zmk_hid_mouse_movement_update(CLAMP(msg.x * 100, INT8_MIN, INT8_MAX),
+                                          CLAMP(msg.y * 100, INT8_MIN, INT8_MAX));
         }
 
         zmk_endpoints_send_mouse_report();
