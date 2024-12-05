@@ -35,8 +35,8 @@ static void pd_process_msgq(struct k_work *work) {
             zmk_hid_mouse_movement_set(0, 0);
             zmk_hid_mouse_scroll_update(msg.x, msg.y);
         } else {
-            hor = CLAMP(msg.x * 100, INT8_MIN, INT8_MAX);
-            ver = CLAMP(msg.y * 100, INT8_MIN, INT8_MAX);
+            int16_t hor = CLAMP(msg.x * 100, INT16_MIN, INT16_MAX);
+            int16_t ver = CLAMP(msg.y * 100, INT16_MIN, INT16_MAX);
             LOG_INF("Send pd position data (%d, %d)", hor, ver);
             zmk_hid_mouse_movement_set(0, 0);
             zmk_hid_mouse_scroll_set(0, 0);
