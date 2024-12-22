@@ -89,6 +89,7 @@ if ((NOT CONFIG_ZMK_SPLIT) OR CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 else()
   if (CONFIG_ZMK_BLE)
     target_sources_ifdef(CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS app PRIVATE src/rgb_underglow/ble_peripheral_status.c)
+  endif()
 endif()
 
 target_sources_ifdef(CONFIG_ZMK_RGB_UNDERGLOW app PRIVATE src/behaviors/behavior_rgb_underglow.c)
