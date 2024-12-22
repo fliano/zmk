@@ -45,7 +45,7 @@ static void rgb_underglow_ble_peripheral_status_timeout_timer(struct k_timer *ti
 
 K_TIMER_DEFINE(underglow_ble_peripheral_timeout_timer, rgb_underglow_ble_peripheral_status_timeout_timer, NULL);
 
-static int output_status_update_cb(const zmk_event_t *eh) {
+static int rgb_underglow_ble_peripheral_state_event_listener(const zmk_event_t *eh) {
   const struct peripheral_ble_state state = zmk_get_ble_peripheral_state(eh);
 
   if (is_starting_up())
