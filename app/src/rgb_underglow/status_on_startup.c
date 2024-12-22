@@ -1,3 +1,5 @@
+#define IS_PERIPHERAL (IS_ENABLED(CONFIG_ZMK_SPLIT) && !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL))
+
 #include <zephyr/device.h>
 #include <zephyr/init.h>
 #include <zephyr/kernel.h>
@@ -12,7 +14,11 @@
 #include <zmk/rgb_underglow/startup_mutex.h>
 #include <zmk/rgb_underglow/current_status.h>
 #include <zmk/rgb_underglow/battery_status.h>
+#if !IS_PERIPHERAL
 #include <zmk/rgb_underglow/ble_status.h>
+#else
+#include <zmk/rgb_underglow/ble_peripheral_status.h>
+#endif // !IS_PERIPHERAL
 #include <zmk/rgb_underglow/status_on_startup.h>
 
 #include <zmk/event_manager.h>
@@ -27,7 +33,6 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-#define IS_PERIPHERAL (IS_ENABLED(CONFIG_ZMK_SPLIT) && !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL))
 
 enum STARTUP_STATE {
     BATTERY,
