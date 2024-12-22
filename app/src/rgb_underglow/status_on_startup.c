@@ -14,11 +14,8 @@
 #include <zmk/rgb_underglow/startup_mutex.h>
 #include <zmk/rgb_underglow/current_status.h>
 #include <zmk/rgb_underglow/battery_status.h>
-#if !IS_PERIPHERAL
 #include <zmk/rgb_underglow/ble_status.h>
-#else
 #include <zmk/rgb_underglow/ble_peripheral_status.h>
-#endif // !IS_PERIPHERAL
 #include <zmk/rgb_underglow/status_on_startup.h>
 
 #include <zmk/event_manager.h>
