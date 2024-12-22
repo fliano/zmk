@@ -27,6 +27,8 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
+#define IS_PERIPHERAL (IS_ENABLED(CONFIG_ZMK_SPLIT) && !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL))
+
 enum STARTUP_STATE {
     BATTERY,
     CONNECTING,
@@ -39,14 +41,16 @@ static struct k_timer *running_timer;
 
 static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     uint8_t state_of_charge = zmk_battery_state_of_charge();
+#if !IS_PERIPHERAL
     struct output_state os = zmk_get_output_state();
-
     if (os.selected_endpoint.transport == ZMK_TRANSPORT_USB) {
         k_timer_stop(running_timer);
         zmk_rgb_underglow_apply_current_state();
         return;
     }
-
+#else
+    struct peripheral_ble_state ps = zmk_get_ble_peripheral_state();
+#endif // !IS_PERIPHERAL
     LOG_INF("state %d", startup_state);
 
     int64_t uptime = k_uptime_get();
@@ -54,7 +58,11 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
         switch (startup_state) {
         case BATTERY:
             LOG_INF("battery to connectiing/connected");
+#if !IS_PERIPHERAL
             startup_state = os.active_profile_connected ? CONNECTED : CONNECTING;
+#else
+            startup_state = ps.connected ? CONNECTED : CONNECTING;
+#endif // !IS_PERIPHERAL
             last_checkpoint = uptime;
             break;
         case CONNECTED:
@@ -65,7 +73,11 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
         }
     }
 
+#if !IS_PERIPHERAL
     if (startup_state == CONNECTING && os.active_profile_connected) {
+#else
+    if (startup_state == CONNECTING && ps.connected) {
+#endif // !IS_PERIPHERAL
         LOG_INF("connecting -> connected");
         startup_state = CONNECTED;
         last_checkpoint = uptime;
@@ -79,7 +91,11 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     case CONNECTING:
     case CONNECTED:
         LOG_INF("set battery col");
+#if !IS_PERIPHERAL
         zmk_rgb_underglow_set_color_ble(os);
+#else
+        zmk_rgb_underglow_set_color_ble_peripheral(ps);
+#endif // !IS_PERIPHERAL
         return;
     }
 }

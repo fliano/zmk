@@ -73,7 +73,6 @@ static int rgb_underglow_ble_state_event_listener(const zmk_event_t *eh) {
         k_timer_start(&underglow_ble_timeout_timer, K_SECONDS(2), K_NO_WAIT);
 
     struct zmk_led_hsb color = {h : sc.selected_endpoint.ble.profile_index * 60, s : 100, b : 30};
-    zmk_rgb_ug_set_hsb(color);
     return zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) | zmk_rgb_ug_set_hsb(color);
 }
 
