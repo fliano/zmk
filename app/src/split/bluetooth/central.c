@@ -77,7 +77,7 @@ struct peripheral_input_slot {
 #define COUNT_INPUT_SPLIT(n) +1
 
 static struct peripheral_input_slot
-    peripheral_input_slots[2];
+    peripheral_input_slots[CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS];
 
 static bool input_slot_is_open(size_t i) {
     return i < ARRAY_SIZE(peripheral_input_slots) && peripheral_input_slots[i].conn == NULL;
@@ -1185,3 +1185,4 @@ static int zmk_split_bt_central_listener_cb(const zmk_event_t *eh) {
 
 ZMK_LISTENER(zmk_split_bt_central, zmk_split_bt_central_listener_cb);
 ZMK_SUBSCRIPTION(zmk_split_bt_central, zmk_physical_layout_selection_changed);
+
