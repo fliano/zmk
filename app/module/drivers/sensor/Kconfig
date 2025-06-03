@@ -8,4 +8,6 @@ rsource "ec11/Kconfig"
 rsource "max17048/Kconfig"
 rsource "pixart/pmw3610/Kconfig"
 
+rsource "encoder_mock/Kconfig"
+
 endif # SENSOR
