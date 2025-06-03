@@ -6,16 +6,23 @@ sidebar_label: Split Keyboards
 ZMK supports setups where a keyboard is split into two or more physical parts (also called "sides" or "halves" when split in two), each with their own controller running ZMK. The parts communicate with each other to work as a single keyboard device.
 
 :::note[Split communication protocols]
-Currently ZMK only supports split keyboards that communicate with each other wirelessly over BLE.
-As such, only controllers that support BLE can be used with ZMK split keyboards.
+ZMK supports split keyboards that communicate with each other wirelessly over BLE.
 
-Supporting split communication over wired protocols is planned, allowing for ZMK split keyboards using non-wireless controllers.
+Full-duplex UART, wired split support is currently experimental, and is available for advanced/technical users to test.
+
+Future single-wire, half-duplex UART support, which is planned, will allow using wired ZMK with designs like Corne, Sweep, etc. that use only a single GPIO pin for bidirectional communication between split sides.
+:::
+
+:::warning[Hot Plugging Cables]
+
+Many popular cables, in particular, TRRS/TRS cables, can cause irreparable damage to controllers if they are inserted or removed when power is already present on them. Whether or not you are using the wired split functionality or not, _never_ insert or remove such a cable when a controller is powered by USB _or_ battery.
+
 :::
 
 ## Central and Peripheral Roles
 
 In split keyboards running ZMK, one part is assigned the "central" role which receives key position and sensor events from the other parts that are called "peripherals."
-The central runs the necessary keymap logic to convert received events into HID events such as keycodes and then communicates with the connected host devices, e.g. over USB or bluetooth.
+The central runs the necessary keymap logic to convert received events into HID events such as keycodes and then communicates with the connected host devices, e.g. over USB or bluetooth. If the keyboard makes use of a [dongle](../development/hardware-integration/dongle.mdx), then the dongle takes on the role of central.
 
 The internal keyboard state (like active layers) is handled exclusively by the central.
 Peripherals _cannot_ communicate with host devices on their own, since they can only communicate with the central.
@@ -32,7 +39,7 @@ You can refer to the [power profiler](/power-profiler) to see battery life estim
 
 The [new shield guide](../development/hardware-integration/new-shield.mdx) details how to define a split keyboard shield with two parts, enabling the split feature and setting up the necessary roles for each part.
 
-Also see the reference section on [split keyboards configuration](../config/system.md#split-keyboards) where the relevant symbols include `CONFIG_ZMK_SPLIT` that enables the feature, `CONFIG_ZMK_SPLIT_ROLE_CENTRAL` which sets the central role and `CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS` that sets the number of peripherals.
+Also see the reference section on [split keyboards configuration](../config/split.md) where the relevant symbols include `CONFIG_ZMK_SPLIT` that enables the feature, `CONFIG_ZMK_SPLIT_ROLE_CENTRAL` which sets the central role and `CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS` that sets the number of peripherals.
 
 ### Latency Considerations
 
