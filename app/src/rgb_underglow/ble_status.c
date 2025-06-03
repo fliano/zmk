@@ -33,17 +33,19 @@ struct output_state zmk_get_output_state() {
 
 int zmk_rgb_underglow_set_color_ble(struct output_state os) {
     if (os.selected_endpoint.transport == ZMK_TRANSPORT_BLE) {
+        struct zmk_led_hsb color = {
+            h : sc.selected_endpoint.ble.profile_index * 60,
+            s : 100,
+            b : 30
+        };
         if (os.active_profile_bonded) {
-            if (os.active_profile_connected) {
-                struct zmk_led_hsb color = {h : 0, s : 100, b : 30};
-                return zmk_rgb_ug_set_hsb(color);
-            }
-            struct zmk_led_hsb color = {h : 180, s : 100, b : 30};
-            return zmk_rgb_ug_set_hsb(color);
+            if (os.active_profile_connected)
+                return zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_SOLID) | zmk_rgb_ug_set_hsb(color);
+            return zmk_rgb_ug_set_spd(2) | zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) |
+                   zmk_rgb_ug_set_hsb(color);
         }
-        struct zmk_led_hsb color = {h : 240, s : 100, b : 30};
-
-        return zmk_rgb_ug_set_hsb(color);
+        return zmk_rgb_ug_set_spd(5) | zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) |
+               zmk_rgb_ug_set_hsb(color);
     }
     return 0;
 }
@@ -72,8 +74,7 @@ static int rgb_underglow_ble_state_event_listener(const zmk_event_t *eh) {
     if (sc.active_profile_connected)
         k_timer_start(&underglow_ble_timeout_timer, K_SECONDS(2), K_NO_WAIT);
 
-    struct zmk_led_hsb color = {h : sc.selected_endpoint.ble.profile_index * 60, s : 100, b : 30};
-    return zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) | zmk_rgb_ug_set_hsb(color);
+    return zmk_rgb_underglow_set_color_ble(sc);
 }
 
 ZMK_LISTENER(rgb_ble, rgb_underglow_ble_state_event_listener);

@@ -30,7 +30,6 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-
 enum STARTUP_STATE {
     BATTERY,
     CONNECTING,
@@ -59,11 +58,15 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     if (last_checkpoint + 3000 < uptime && startup_state != CONNECTING) {
         switch (startup_state) {
         case BATTERY:
-            LOG_INF("battery to connectiing/connected");
+            LOG_INF("battery to connecting/connected");
 #if !IS_PERIPHERAL
             startup_state = os.active_profile_connected ? CONNECTED : CONNECTING;
+            if (startup_state == CONNECTING)
+                zmk_rgb_underglow_set_color_ble(os);
 #else
             startup_state = ps.connected ? CONNECTED : CONNECTING;
+            if (startup_state == CONNECTING)
+                zmk_rgb_underglow_set_color_ble_peripheral(ps);
 #endif // !IS_PERIPHERAL
             last_checkpoint = uptime;
             break;
@@ -90,7 +93,6 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
         LOG_INF("set to battery col");
         rgb_underglow_set_color_battery(state_of_charge);
         return;
-    case CONNECTING:
     case CONNECTED:
         LOG_INF("set battery col");
 #if !IS_PERIPHERAL
@@ -123,7 +125,7 @@ int startup_handler(const zmk_event_t *eh) {
             ZMK_ACTIVITY_SLEEP, ev->state);
     switch (ev->state) {
     case ZMK_ACTIVITY_ACTIVE:
-        if (last_activity_state == ZMK_ACTIVITY_IDLE) {
+        if (last_activity_state == ZMK_ACTIVITY_SLEEP) {
             if (!start_startup()) {
                 LOG_ERR("already starting up");
                 break;
