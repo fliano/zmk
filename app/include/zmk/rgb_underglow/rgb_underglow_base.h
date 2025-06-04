@@ -6,6 +6,16 @@
 
 #pragma once
 
+#include <zephyr/kernel.h>
+#include <zephyr/devicetree.h>
+
+#if !DT_HAS_CHOSEN(zmk_underglow)
+
+#error "A zmk,underglow chosen node must be declared"
+
+#endif
+
+#define STRIP_CHOSEN DT_CHOSEN(zmk_underglow)
 #define HUE_MAX 360
 #define SAT_MAX 100
 #define BRT_MAX 100
@@ -50,3 +60,5 @@ int zmk_rgb_ug_off(void);
 int zmk_rgb_ug_select_effect(int effect);
 int zmk_rgb_ug_set_spd(int speed);
 int zmk_rgb_ug_set_hsb(struct zmk_led_hsb color);
+void zmk_rgb_ug_tick(struct k_work *work);
+void zmk_rgb_setup(const struct device *led_strip, struct rgb_underglow_state *state);

@@ -94,7 +94,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
         rgb_underglow_set_color_battery(state_of_charge);
         return;
     case CONNECTED:
-        LOG_INF("set battery col");
+        LOG_INF("set to bt col");
 #if !IS_PERIPHERAL
         zmk_rgb_underglow_set_color_ble(os);
 #else
@@ -115,6 +115,16 @@ static void on_startup_timer_tick_cb(struct k_timer *timer) {
 
 K_TIMER_DEFINE(on_startup_timer_tick, on_startup_timer_tick_cb, on_startup_timer_tick_stop_cb);
 
+void init() {
+    if (!start_startup()) {
+        LOG_ERR("already starting up");
+        return;
+    }
+    startup_state = BATTERY;
+    last_checkpoint = k_uptime_get();
+    k_timer_start(&on_startup_timer_tick, K_NO_WAIT, K_MSEC(100));
+}
+
 int startup_handler(const zmk_event_t *eh) {
     struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
     if (ev == NULL) {
@@ -123,16 +133,11 @@ int startup_handler(const zmk_event_t *eh) {
 
     LOG_INF("activity state changed %d %d %d, %d", ZMK_ACTIVITY_ACTIVE, ZMK_ACTIVITY_IDLE,
             ZMK_ACTIVITY_SLEEP, ev->state);
+
     switch (ev->state) {
     case ZMK_ACTIVITY_ACTIVE:
         if (last_activity_state == ZMK_ACTIVITY_SLEEP) {
-            if (!start_startup()) {
-                LOG_ERR("already starting up");
-                break;
-            }
-            startup_state = BATTERY;
-            last_checkpoint = k_uptime_get();
-            k_timer_start(&on_startup_timer_tick, K_NO_WAIT, K_MSEC(100));
+            init();
             break;
         }
     default:
