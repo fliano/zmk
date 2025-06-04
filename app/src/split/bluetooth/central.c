@@ -78,7 +78,7 @@ struct peripheral_input_slot {
 #define COUNT_INPUT_SPLIT(n) +1
 
 static struct peripheral_input_slot
-    peripheral_input_slots[(0 DT_FOREACH_STATUS_OKAY(zmk_input_split, COUNT_INPUT_SPLIT))];
+    peripheral_input_slots[CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS];
 
 static bool input_slot_is_open(size_t i) {
     return i < ARRAY_SIZE(peripheral_input_slots) && peripheral_input_slots[i].conn == NULL;
