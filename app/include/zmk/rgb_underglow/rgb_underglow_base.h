@@ -6,47 +6,21 @@
 
 #pragma once
 
-#define HUE_MAX 360
-#define SAT_MAX 100
-#define BRT_MAX 100
+#include <zephyr/kernel.h>
+#include <zephyr/devicetree.h>
+#include <zmk/rgb_underglow/state.h>
 
-struct zmk_led_hsb {
-    uint16_t h;
-    uint8_t s;
-    uint8_t b;
-};
+#if !DT_HAS_CHOSEN(zmk_underglow)
 
-struct rgb_underglow_state {
-    struct zmk_led_hsb color;
-    uint8_t animation_speed;
-    uint8_t current_effect;
-    uint16_t animation_step;
-    bool on;
-};
+#error "A zmk,underglow chosen node must be declared"
 
-enum rgb_underglow_effect {
-    UNDERGLOW_EFFECT_SOLID,
-    UNDERGLOW_EFFECT_BREATHE,
-    UNDERGLOW_EFFECT_SPECTRUM,
-    UNDERGLOW_EFFECT_SWIRL,
-    UNDERGLOW_EFFECT_NUMBER // Used to track number of underglow effects
-};
+#endif
 
-static const struct rgb_underglow_state default_rgb_settings = (struct rgb_underglow_state){
-    color : {
-        h : CONFIG_ZMK_RGB_UNDERGLOW_HUE_START,
-        s : CONFIG_ZMK_RGB_UNDERGLOW_SAT_START,
-        b : CONFIG_ZMK_RGB_UNDERGLOW_BRT_START,
-    },
-    animation_speed : CONFIG_ZMK_RGB_UNDERGLOW_SPD_START,
-    current_effect : CONFIG_ZMK_RGB_UNDERGLOW_EFF_START,
-    animation_step : 0,
-    on : IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_ON_START)
-};
+#define STRIP_CHOSEN DT_CHOSEN(zmk_underglow)
+#define STRIP_NUM_PIXELS DT_PROP(STRIP_CHOSEN, chain_length)
 
-int zmk_rgb_ug_get_state(bool *state);
-int zmk_rgb_ug_on(void);
-int zmk_rgb_ug_off(void);
 int zmk_rgb_ug_select_effect(int effect);
 int zmk_rgb_ug_set_spd(int speed);
 int zmk_rgb_ug_set_hsb(struct zmk_led_hsb color);
+void zmk_rgb_ug_tick(struct k_work *work);
+void zmk_rgb_ug_tools_init(const struct device *led_strip);
