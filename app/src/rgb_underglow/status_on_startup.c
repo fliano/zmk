@@ -106,7 +106,10 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
 
 K_WORK_DEFINE(on_startup_timer_tick_work, zmk_on_startup_timer_tick_work);
 
-static void on_startup_timer_tick_stop_cb(struct k_timer *timer) { stop_startup(); }
+static void on_startup_timer_tick_stop_cb(struct k_timer *timer) {
+    LOG_DBG("on_startup_timer_tick_stop_cb called");
+    stop_startup();
+}
 
 static void on_startup_timer_tick_cb(struct k_timer *timer) {
     running_timer = timer;
@@ -125,31 +128,42 @@ void init() {
     k_timer_start(&on_startup_timer_tick, K_NO_WAIT, K_MSEC(100));
 }
 
-int startup_handler(const zmk_event_t *eh) {
-    struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
-    if (ev == NULL) {
-        return -ENOTSUP;
-    }
-
-    LOG_INF("activity state changed %d %d %d, %d", ZMK_ACTIVITY_ACTIVE, ZMK_ACTIVITY_IDLE,
-            ZMK_ACTIVITY_SLEEP, ev->state);
-
-    switch (ev->state) {
+int startup(const enum zmk_activity_state state) {
+    switch (state) {
     case ZMK_ACTIVITY_ACTIVE:
         if (last_activity_state == ZMK_ACTIVITY_SLEEP) {
             init();
             break;
         }
     default:
+        last_activity_state = state;
         if (is_starting_up()) {
             k_timer_stop(&on_startup_timer_tick);
+            return zmk_rgb_underglow_apply_current_state();
         }
         break;
     }
 
-    last_activity_state = ev->state;
     return 0;
+}
+
+int startup_handler(const zmk_event_t *eh) {
+    struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
+    if (ev == NULL) {
+        return -ENOTSUP;
+    }
+
+    LOG_INF("activity state changed %d %d %d, %d, last %d", ZMK_ACTIVITY_ACTIVE, ZMK_ACTIVITY_IDLE,
+            ZMK_ACTIVITY_SLEEP, ev->state, last_activity_state);
+
+    return startup(ev->state);
+}
+
+static int startup_init(void) {
+    last_activity_state = ZMK_ACTIVITY_SLEEP;
+    return startup(ZMK_ACTIVITY_ACTIVE);
 }
 
 ZMK_LISTENER(status_on_startup, startup_handler);
 ZMK_SUBSCRIPTION(status_on_startup, zmk_activity_state_changed);
+SYS_INIT(startup_init, APPLICATION, CONFIG_ZMK_USB_HID_INIT_PRIORITY);

@@ -174,10 +174,14 @@ int zmk_rgb_ug_select_effect(int effect) {
         return -EINVAL;
     }
 
+    if (effect == state->current_effect) {
+        return 0;
+    }
+
     state->current_effect = effect;
     state->animation_step = 0;
 
-    return zmk_rgb_ug_save_state();
+    return 0;
 }
 
 int zmk_rgb_ug_set_spd(int speed) {
@@ -191,7 +195,7 @@ int zmk_rgb_ug_set_spd(int speed) {
 
     state->animation_speed = clamped_speed;
 
-    return zmk_rgb_ug_save_state();
+    return 0;
 }
 
 int zmk_rgb_ug_set_hsb(struct zmk_led_hsb color) {
@@ -201,7 +205,7 @@ int zmk_rgb_ug_set_hsb(struct zmk_led_hsb color) {
 
     state->color = color;
 
-    return zmk_rgb_ug_save_state();
+    return 0;
 }
 
 void zmk_rgb_ug_tools_init(const struct device *led_strip_dev) {

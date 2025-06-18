@@ -3,30 +3,36 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-K_MUTEX_DEFINE(startup_mutex);
+static K_MUTEX_DEFINE(startup_mutex);
+bool starting_up = false;
 
-bool is_starting_up() {
-    if (k_mutex_lock(&startup_mutex, K_NO_WAIT) != 0) {
-        return true;
-    } else {
-        k_mutex_unlock(&startup_mutex);
+bool set_starting_up(bool value) {
+    if (k_mutex_lock(&startup_mutex, K_MSEC(300)) != 0) {
+        LOG_WRN("failing to set starting up status since mutex is locked");
         return false;
     }
-}
-
-bool start_startup() {
-    if (k_mutex_lock(&startup_mutex, K_NO_WAIT) != 0) {
-        LOG_WRN("failing to lock mutex");
-        return false;
+    if (starting_up == value) {
+        LOG_DBG("already set to %d, not changing", value);
     }
-    LOG_WRN("locking mutex");
+    starting_up = value;
+    int unlock = k_mutex_unlock(&startup_mutex);
+    LOG_DBG("unlocked mutex, set starting_up to %d, status was %d, 0, %d, %d", value, unlock,
+            -EPERM, -EINVAL);
     return true;
 }
 
-void stop_startup() {
-    if (!is_starting_up()) {
-        LOG_WRN("stopping non running startup");
-        return;
+bool is_starting_up() {
+    if (k_mutex_lock(&startup_mutex, K_MSEC(300)) != 0) {
+        LOG_INF("Cannot get starting up status since mutex is locked");
+        return true;
+    } else {
+        bool ret = starting_up;
+        int unlock = k_mutex_unlock(&startup_mutex);
+        LOG_INF("status was %d, 0, %d, %d", unlock, -EPERM, -EINVAL);
+        return ret;
     }
-    k_mutex_unlock(&startup_mutex);
 }
+
+bool start_startup() { return set_starting_up(true); }
+
+void stop_startup() { return set_starting_up(false); }

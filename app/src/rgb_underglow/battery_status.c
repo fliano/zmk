@@ -8,6 +8,7 @@
 
 #include <zephyr/logging/log.h>
 
+#include <zmk/rgb_underglow/init.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 #include <zmk/rgb_underglow/startup_mutex.h>
 #include <zmk/rgb_underglow/current_status.h>
@@ -19,17 +20,22 @@
 #include <zmk/workqueue.h>
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
+uint8_t last_state_of_charge = 100;
 
 int rgb_underglow_set_color_battery(uint8_t state_of_charge) {
+    last_state_of_charge = state_of_charge;
     if (state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_CRITICALLY_LOW_THRESHOLD) {
-        struct zmk_led_hsb color = {h : 0, s : 100, b : 30};
-        return zmk_rgb_ug_set_hsb(color);
+        struct zmk_led_hsb color = {h : 0, s : 100, b : 5};
+        return zmk_rgb_ug_on() | zmk_rgb_ug_set_spd(5) |
+               zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) | zmk_rgb_ug_set_hsb(color);
     } else if (state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_LOW_THRESHOLD) {
         struct zmk_led_hsb color = {h : 60, s : 100, b : 30};
-        return zmk_rgb_ug_set_hsb(color);
+        return zmk_rgb_ug_on() | zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_SOLID) |
+               zmk_rgb_ug_set_hsb(color);
     } else {
         struct zmk_led_hsb color = {h : 120, s : 100, b : 30};
-        return zmk_rgb_ug_set_hsb(color);
+        return zmk_rgb_ug_on() | zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_SOLID) |
+               zmk_rgb_ug_set_hsb(color);
     }
 }
 
@@ -55,9 +61,31 @@ static int rgb_underglow_battery_state_event_listener(const zmk_event_t *eh) {
     if (is_starting_up())
         return 0;
 
-    k_timer_start(&underglow_timeout_timer, K_SECONDS(1), K_NO_WAIT);
-    return rgb_underglow_set_color_battery(sc->state_of_charge);
+    if (sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_CRITICALLY_LOW_THRESHOLD) {
+        struct zmk_led_hsb color = {h : 0, s : 100, b : 5};
+        last_state_of_charge = sc->state_of_charge;
+        return zmk_rgb_ug_on() | zmk_rgb_ug_set_spd(5) |
+               zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) | zmk_rgb_ug_set_hsb(color);
+    }
+
+    if (sc->state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_LOW_THRESHOLD &&
+        (last_state_of_charge >= CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_LOW_THRESHOLD ||
+         last_state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_CRITICALLY_LOW_THRESHOLD)) {
+        k_timer_start(&underglow_timeout_timer, K_SECONDS(5), K_NO_WAIT);
+        last_state_of_charge = sc->state_of_charge;
+        return rgb_underglow_set_color_battery(sc->state_of_charge);
+    }
+
+    if (sc->state_of_charge >= CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_LOW_THRESHOLD &&
+        last_state_of_charge < CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_LOW_THRESHOLD) {
+        k_timer_start(&underglow_timeout_timer, K_SECONDS(5), K_NO_WAIT);
+        last_state_of_charge = sc->state_of_charge;
+        return rgb_underglow_set_color_battery(sc->state_of_charge);
+    }
+
+    last_state_of_charge = sc->state_of_charge;
+    return 0;
 }
 
 ZMK_LISTENER(rgb_battery, rgb_underglow_battery_state_event_listener);
-/*ZMK_SUBSCRIPTION(rgb_battery, zmk_battery_state_changed);*/
+ZMK_SUBSCRIPTION(rgb_battery, zmk_battery_state_changed);

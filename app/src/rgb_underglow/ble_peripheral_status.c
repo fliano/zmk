@@ -8,6 +8,7 @@
 
 #include <zephyr/logging/log.h>
 
+#include <zmk/rgb_underglow/init.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 #include <zmk/rgb_underglow/startup_mutex.h>
 #include <zmk/rgb_underglow/current_status.h>
@@ -27,9 +28,10 @@ struct peripheral_ble_state zmk_get_ble_peripheral_state() {
 int zmk_rgb_underglow_set_color_ble_peripheral(struct peripheral_ble_state ps) {
     struct zmk_led_hsb color = {h : 240, s : 100, b : 30};
     if (ps.connected)
-        return zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_SOLID) | zmk_rgb_ug_set_hsb(color);
-    return zmk_rgb_ug_set_spd(2) | zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) |
-           zmk_rgb_ug_set_hsb(color);
+        return zmk_rgb_ug_on() | zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_SOLID) |
+               zmk_rgb_ug_set_hsb(color);
+    return zmk_rgb_ug_on() | zmk_rgb_ug_set_spd(5) |
+           zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) | zmk_rgb_ug_set_hsb(color);
 }
 
 static void rgb_underglow_ble_peripheral_status_timeout_work(struct k_work *work) {
@@ -47,15 +49,19 @@ K_TIMER_DEFINE(underglow_ble_peripheral_timeout_timer,
                rgb_underglow_ble_peripheral_status_timeout_timer, NULL);
 
 static int rgb_underglow_ble_peripheral_state_event_listener(const zmk_event_t *eh) {
-    const struct peripheral_ble_state state = zmk_get_ble_peripheral_state(eh);
+    const struct peripheral_ble_state state = zmk_get_ble_peripheral_state();
+    LOG_DBG("BLE Peripheral state changed: connected=%d", state.connected);
 
     if (is_starting_up())
         return 0;
 
+    LOG_DBG("not in startup, starting timer");
+
     if (state.connected)
         k_timer_start(&underglow_ble_peripheral_timeout_timer, K_SECONDS(2), K_NO_WAIT);
 
+    LOG_DBG("set to ble color");
     return zmk_rgb_underglow_set_color_ble_peripheral(state);
 }
 ZMK_LISTENER(rgb_ble_peripheral, rgb_underglow_ble_peripheral_state_event_listener);
-/*ZMK_SUBSCRIPTION(rgb_ble, zmk_split_peripheral_status_changed);*/
+ZMK_SUBSCRIPTION(rgb_ble_peripheral, zmk_split_peripheral_status_changed);

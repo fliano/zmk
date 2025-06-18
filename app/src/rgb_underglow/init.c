@@ -44,6 +44,10 @@ int zmk_rgb_ug_on(void) {
     if (!led_strip)
         return -ENODEV;
 
+    if (state->on) {
+        return 0;
+    }
+
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_EXT_POWER)
     if (ext_power != NULL) {
         int rc = ext_power_enable(ext_power);
@@ -57,7 +61,7 @@ int zmk_rgb_ug_on(void) {
     state->animation_step = 0;
     k_timer_start(&underglow_tick, K_NO_WAIT, K_MSEC(50));
 
-    return zmk_rgb_ug_save_state();
+    return 0;
 }
 
 static void zmk_rgb_ug_off_handler(struct k_work *work) {
@@ -75,6 +79,10 @@ int zmk_rgb_ug_off(void) {
     if (!led_strip)
         return -ENODEV;
 
+    if (!state->on) {
+        return 0;
+    }
+
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_EXT_POWER)
     if (ext_power != NULL) {
         int rc = ext_power_disable(ext_power);
@@ -89,7 +97,7 @@ int zmk_rgb_ug_off(void) {
     k_timer_stop(&underglow_tick);
     state->on = false;
 
-    return zmk_rgb_ug_save_state();
+    return 0;
 }
 
 static int zmk_rgb_ug_init(void) {
@@ -104,10 +112,11 @@ static int zmk_rgb_ug_init(void) {
 
     zmk_rgb_ug_state_init();
     zmk_rgb_ug_tools_init(led_strip);
+    zmk_rgb_underglow_init();
 
     state = zmk_rgb_ug_get_state();
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_AUTO_OFF_USB)
-    state.on = zmk_usb_is_powered();
+    state->on = zmk_usb_is_powered();
 #endif
 
     if (state->on) {

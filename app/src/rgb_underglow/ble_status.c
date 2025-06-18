@@ -8,6 +8,7 @@
 
 #include <zephyr/logging/log.h>
 
+#include <zmk/rgb_underglow/init.h>u
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 #include <zmk/rgb_underglow/startup_mutex.h>
 #include <zmk/rgb_underglow/current_status.h>
@@ -40,12 +41,13 @@ int zmk_rgb_underglow_set_color_ble(struct output_state os) {
         };
         if (os.active_profile_bonded) {
             if (os.active_profile_connected)
-                return zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_SOLID) | zmk_rgb_ug_set_hsb(color);
-            return zmk_rgb_ug_set_spd(2) | zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) |
-                   zmk_rgb_ug_set_hsb(color);
+                return zmk_rgb_ug_on() | zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_SOLID) |
+                       zmk_rgb_ug_set_hsb(color);
+            return zmk_rgb_ug_on() | zmk_rgb_ug_set_spd(2) |
+                   zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) | zmk_rgb_ug_set_hsb(color);
         }
-        return zmk_rgb_ug_set_spd(5) | zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) |
-               zmk_rgb_ug_set_hsb(color);
+        return zmk_rgb_ug_on() | zmk_rgb_ug_set_spd(5) |
+               zmk_rgb_ug_select_effect(UNDERGLOW_EFFECT_BREATHE) | zmk_rgb_ug_set_hsb(color);
     }
     return 0;
 }
@@ -78,8 +80,5 @@ static int rgb_underglow_ble_state_event_listener(const zmk_event_t *eh) {
 }
 
 ZMK_LISTENER(rgb_ble, rgb_underglow_ble_state_event_listener);
-/*ZMK_SUBSCRIPTION(rgb_ble, zmk_endpoint_changed);*/
-/**/
-/*#if defined(CONFIG_ZMK_BLE)*/
-/*ZMK_SUBSCRIPTION(rgb_ble, zmk_ble_active_profile_changed);*/
-/*#endif*/
+ZMK_SUBSCRIPTION(rgb_ble, zmk_endpoint_changed);
+ZMK_SUBSCRIPTION(rgb_ble, zmk_ble_active_profile_changed);

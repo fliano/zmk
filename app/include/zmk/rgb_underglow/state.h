@@ -41,5 +41,6 @@ static const struct rgb_underglow_state default_rgb_settings = (struct rgb_under
 };
 
 struct rgb_underglow_state *zmk_rgb_ug_get_state(void);
+struct rgb_underglow_state *zmk_rgb_ug_get_save_state(void);
 int zmk_rgb_ug_save_state(void);
 int zmk_rgb_ug_state_init(void);
