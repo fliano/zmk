@@ -44,10 +44,6 @@ int zmk_rgb_ug_on(void) {
     if (!led_strip)
         return -ENODEV;
 
-    if (state->on) {
-        return 0;
-    }
-
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_EXT_POWER)
     if (ext_power != NULL) {
         int rc = ext_power_enable(ext_power);
@@ -78,10 +74,6 @@ K_WORK_DEFINE(underglow_off_work, zmk_rgb_ug_off_handler);
 int zmk_rgb_ug_off(void) {
     if (!led_strip)
         return -ENODEV;
-
-    if (!state->on) {
-        return 0;
-    }
 
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_EXT_POWER)
     if (ext_power != NULL) {

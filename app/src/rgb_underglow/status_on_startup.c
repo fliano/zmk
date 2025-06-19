@@ -37,11 +37,19 @@ enum STARTUP_STATE {
 };
 static enum zmk_activity_state last_activity_state = ZMK_ACTIVITY_SLEEP;
 static int64_t last_checkpoint = 0;
+#if CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS
 static enum STARTUP_STATE startup_state = BATTERY;
+#else
+static enum STARTUP_STATE startup_state = CONNECTING;
+#endif // CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS
+static bool switched_startup_state = true;
 static struct k_timer *running_timer;
 
 static void zmk_on_startup_timer_tick_work(struct k_work *work) {
+#if CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS
     uint8_t state_of_charge = zmk_battery_state_of_charge();
+#endif // CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS
+#if CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS
 #if !IS_PERIPHERAL
     struct output_state os = zmk_get_output_state();
     if (os.selected_endpoint.transport == ZMK_TRANSPORT_USB) {
@@ -52,6 +60,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
 #else
     struct peripheral_ble_state ps = zmk_get_ble_peripheral_state();
 #endif // !IS_PERIPHERAL
+#endif // CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS
     LOG_INF("state %d", startup_state);
 
     int64_t uptime = k_uptime_get();
@@ -59,15 +68,18 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
         switch (startup_state) {
         case BATTERY:
             LOG_INF("battery to connecting/connected");
+#if CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS
 #if !IS_PERIPHERAL
             startup_state = os.active_profile_connected ? CONNECTED : CONNECTING;
-            if (startup_state == CONNECTING)
-                zmk_rgb_underglow_set_color_ble(os);
 #else
             startup_state = ps.connected ? CONNECTED : CONNECTING;
-            if (startup_state == CONNECTING)
-                zmk_rgb_underglow_set_color_ble_peripheral(ps);
 #endif // !IS_PERIPHERAL
+            switched_startup_state = true;
+#else
+            k_timer_stop(running_timer); // probably won't work
+            zmk_rgb_underglow_apply_current_state();
+            return;
+#endif // CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS
             last_checkpoint = uptime;
             break;
         case CONNECTED:
@@ -78,6 +90,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
         }
     }
 
+#if CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS
 #if !IS_PERIPHERAL
     if (startup_state == CONNECTING && os.active_profile_connected) {
 #else
@@ -86,21 +99,39 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
         LOG_INF("connecting -> connected");
         startup_state = CONNECTED;
         last_checkpoint = uptime;
+        switched_startup_state = true;
     }
+#endif // CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS
 
-    switch (startup_state) {
-    case BATTERY:
-        LOG_INF("set to battery col");
-        rgb_underglow_set_color_battery(state_of_charge);
-        return;
-    case CONNECTED:
-        LOG_INF("set to bt col");
+    if (switched_startup_state) {
+        switched_startup_state = false;
+        switch (startup_state) {
+#if CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS
+        case BATTERY:
+            LOG_INF("set to battery col");
+            rgb_underglow_set_color_battery(state_of_charge);
+            return;
+#endif // CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS
+#if CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS
+        case CONNECTING:
 #if !IS_PERIPHERAL
-        zmk_rgb_underglow_set_color_ble(os);
+            zmk_rgb_underglow_set_color_ble(os);
 #else
-        zmk_rgb_underglow_set_color_ble_peripheral(ps);
+            zmk_rgb_underglow_set_color_ble_peripheral(ps);
 #endif // !IS_PERIPHERAL
-        return;
+
+        case CONNECTED:
+            LOG_INF("set to bt col");
+#if !IS_PERIPHERAL
+            zmk_rgb_underglow_set_color_ble(os);
+#else
+            zmk_rgb_underglow_set_color_ble_peripheral(ps);
+#endif // !IS_PERIPHERAL
+#endif // CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS
+            return;
+        default:
+            return;
+        }
     }
 }
 
@@ -123,7 +154,13 @@ void init() {
         LOG_ERR("already starting up");
         return;
     }
+
+#if CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS
     startup_state = BATTERY;
+#else
+    startup_state = CONNECTING;
+#endif // CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS
+
     last_checkpoint = k_uptime_get();
     k_timer_start(&on_startup_timer_tick, K_NO_WAIT, K_MSEC(100));
 }
