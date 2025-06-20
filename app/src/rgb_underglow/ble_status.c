@@ -6,8 +6,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <zephyr/logging/log.h>
-
 #include <zmk/rgb_underglow/init.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 #include <zmk/rgb_underglow/startup_mutex.h>
@@ -22,8 +20,6 @@
 #include <zmk/ble.h>
 #include <zmk/endpoints.h>
 #include <zmk/workqueue.h>
-
-LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 struct output_state zmk_get_output_state() {
     return (struct output_state){.selected_endpoint = zmk_endpoints_selected(),

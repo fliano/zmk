@@ -6,8 +6,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <zephyr/logging/log.h>
-
 #include <zmk/rgb_underglow/init.h>
 #include <zmk/rgb_underglow/rgb_underglow_base.h>
 #include <zmk/rgb_underglow/startup_mutex.h>
@@ -18,8 +16,6 @@
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/workqueue.h>
-
-LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 struct peripheral_ble_state zmk_get_ble_peripheral_state() {
     return (struct peripheral_ble_state){.connected = zmk_split_bt_peripheral_is_connected()};
@@ -50,18 +46,15 @@ K_TIMER_DEFINE(underglow_ble_peripheral_timeout_timer,
 
 static int rgb_underglow_ble_peripheral_state_event_listener(const zmk_event_t *eh) {
     const struct peripheral_ble_state state = zmk_get_ble_peripheral_state();
-    LOG_DBG("BLE Peripheral state changed: connected=%d", state.connected);
 
     if (is_starting_up())
         return 0;
 
-    LOG_DBG("not in startup, starting timer");
-
     if (state.connected)
         k_timer_start(&underglow_ble_peripheral_timeout_timer, K_SECONDS(2), K_NO_WAIT);
 
-    LOG_DBG("set to ble color");
     return zmk_rgb_underglow_set_color_ble_peripheral(state);
 }
+
 ZMK_LISTENER(rgb_ble_peripheral, rgb_underglow_ble_peripheral_state_event_listener);
 ZMK_SUBSCRIPTION(rgb_ble_peripheral, zmk_split_peripheral_status_changed);

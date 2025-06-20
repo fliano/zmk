@@ -61,13 +61,11 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
     struct peripheral_ble_state ps = zmk_get_ble_peripheral_state();
 #endif // !IS_PERIPHERAL
 #endif // CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS
-    LOG_INF("state %d", startup_state);
 
     int64_t uptime = k_uptime_get();
     if (last_checkpoint + 3000 < uptime && startup_state != CONNECTING) {
         switch (startup_state) {
         case BATTERY:
-            LOG_INF("battery to connecting/connected");
 #if CONFIG_ZMK_RGB_UNDERGLOW_BLE_STATUS
 #if !IS_PERIPHERAL
             startup_state = os.active_profile_connected ? CONNECTED : CONNECTING;
@@ -83,7 +81,6 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
             last_checkpoint = uptime;
             break;
         case CONNECTED:
-            LOG_INF("stop timer after connected");
             k_timer_stop(running_timer); // probably won't work
             zmk_rgb_underglow_apply_current_state();
             return;
@@ -96,7 +93,6 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
 #else
     if (startup_state == CONNECTING && ps.connected) {
 #endif // !IS_PERIPHERAL
-        LOG_INF("connecting -> connected");
         startup_state = CONNECTED;
         last_checkpoint = uptime;
         switched_startup_state = true;
@@ -108,7 +104,6 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
         switch (startup_state) {
 #if CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS
         case BATTERY:
-            LOG_INF("set to battery col");
             rgb_underglow_set_color_battery(state_of_charge);
             return;
 #endif // CONFIG_ZMK_RGB_UNDERGLOW_BATTERY_STATUS
@@ -121,7 +116,6 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
 #endif // !IS_PERIPHERAL
 
         case CONNECTED:
-            LOG_INF("set to bt col");
 #if !IS_PERIPHERAL
             zmk_rgb_underglow_set_color_ble(os);
 #else
@@ -137,10 +131,7 @@ static void zmk_on_startup_timer_tick_work(struct k_work *work) {
 
 K_WORK_DEFINE(on_startup_timer_tick_work, zmk_on_startup_timer_tick_work);
 
-static void on_startup_timer_tick_stop_cb(struct k_timer *timer) {
-    LOG_DBG("on_startup_timer_tick_stop_cb called");
-    stop_startup();
-}
+static void on_startup_timer_tick_stop_cb(struct k_timer *timer) { stop_startup(); }
 
 static void on_startup_timer_tick_cb(struct k_timer *timer) {
     running_timer = timer;
@@ -151,7 +142,7 @@ K_TIMER_DEFINE(on_startup_timer_tick, on_startup_timer_tick_cb, on_startup_timer
 
 void init() {
     if (!start_startup()) {
-        LOG_ERR("already starting up");
+        LOG_ERR("Cannot start startup sequence, startup sequence already started");
         return;
     }
 
@@ -189,9 +180,6 @@ int startup_handler(const zmk_event_t *eh) {
     if (ev == NULL) {
         return -ENOTSUP;
     }
-
-    LOG_INF("activity state changed %d %d %d, %d, last %d", ZMK_ACTIVITY_ACTIVE, ZMK_ACTIVITY_IDLE,
-            ZMK_ACTIVITY_SLEEP, ev->state, last_activity_state);
 
     return startup(ev->state);
 }
